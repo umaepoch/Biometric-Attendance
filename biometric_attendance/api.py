@@ -23,6 +23,7 @@ from biometric_attendance.zk import ZK
 from frappe.cache_manager import clear_user_cache,clear_global_cache
 from frappe.sessions import Session, clear_sessions
 
+
 @frappe.whitelist()
 def login_feed(login_manager):
 	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
@@ -85,9 +86,10 @@ def check_attendance_leave_before_time():
 								lunchin_punch_status = frappe.get_list("Punch Child",filters= {"punch_type": "Lunch In"}, fields=["punch_no"])
 								check_after_lunch = get_after_lunch(check_next_status[0]['user_id'], today,lunchin_punch_status)
 								if len(check_after_lunch) != 0:
-									check_null_punch = get_null_punch_after(check_after_lunch,unknown_punch)
-									if len(check_null_punch) != 0:
-										frappe.db.set_value("Biometric Attendance", check_null_punch[0].name, "punch", 1)
+									check_null_punchs = get_null_punch_after(check_after_lunch,unknown_punch)
+									f.write("check_null_punchs-------------"+str(check_null_punchs)+"\n")
+									if len(check_null_punchs) != 0:
+										frappe.db.set_value("Biometric Attendance", check_null_punchs[0].name, "punch", 1)
 									else:
 										'''
 										uid = atn.uid
@@ -210,8 +212,11 @@ def waiting_time_prepared(waiting_time,convert_shift_end_time):
 	return addition_of_time
 
 def get_null_punch_after(check_after_lunch,unknown_punch):
+	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	f.write("check_after_lunch--------------"+str(check_after_lunch)+"\n")
+	f.write("unknown_punch--------------"+str(unknown_punch)+"\n")
 	current_date = check_after_lunch[0]['timestamp'].date()
-	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where user_id = %s and punch = %s and timestamp > %s and date = %s""", (check_after_lunch[0]['user_id'], check_after_lunch[0]['timestamp'],current_date,unknown_punch[0]['punch_no']), as_dict=1)
+	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where user_id = %s and punch = %s and timestamp > %s and date = %s""", (check_after_lunch[0]['user_id'],unknown_punch[0]['punch_no'], check_after_lunch[0]['timestamp'],current_date), as_dict=1)
 	return null_punch
 
 def get_null_punch(user_id,timestamp,unknown_punch):

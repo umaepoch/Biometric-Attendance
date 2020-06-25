@@ -152,6 +152,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 							if lunchin_punch_status[0]['punch_no'] in [d['punch'] for d in attnadance_record]:
 								log_in_punch = True
 							else:
+								timestamp = atn['timestamp']
 								login_time = timestamp
 								half_day = True
 								
@@ -201,7 +202,13 @@ def get_prepare_attendance(user_id, attnadance_record):
 					else:
 						if lunchout_punch_status[0]['punch_no'] in [at['punch'] for at in attnadance_record]:
 							if lunchin_punch_status[0]['punch_no'] in [at['punch'] for at in attnadance_record]:
+								timestamp = atn['timestamp']
+								logout_time = atn.timestamp
 								log_out_punch = True
+						else:
+							timestamp = atn['timestamp']
+							logout_time = atn.timestamp
+							log_out_punch = True
 				
 				if half_day == True:
 					validat = frappe.get_list("Daily Attendance" , filters={"employee_id":get_employee[0]['employee'], "date":today}, fields=["name"])
@@ -309,7 +316,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 						#doc.can_be_late_in_month = grade_details[0]['can_be_late_in_month']
 						#doc.can_be_late_in_a_week = grade_details[0]['can_be_late_in_a_week']
 						#doc.total_no_of_minutes_can_be_late_in_a_month = grade_details[0]['total_no_of_minutes_can_be_late_in_a_month']
-						doc.reason_for_non_conformance = "There is no Log in Punch"
+						doc.reason_for_non_conformance = "Missed Log in Punch"
 						get_details = prepare_child_details(grade_details)
 						for d in get_details:
 							child_doc = doc.append('rules',{})
@@ -318,7 +325,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 							child_doc.rule_value = d["rule_value"]
 					
 						doc.save()
-				elif validate_log_out == True:
+				elif log_out_punch == True:
 					validat = frappe.get_list("Daily Attendance" , filters={"employee_id":get_employee[0]['employee'], "date":today}, fields=["name"])
 					if len(validat) == 0:
 						minutes_late_without_p = 0
@@ -373,7 +380,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 						#doc.can_be_late_in_month = grade_details[0]['can_be_late_in_month']
 						#doc.can_be_late_in_a_week = grade_details[0]['can_be_late_in_a_week']
 						#doc.total_no_of_minutes_can_be_late_in_a_month = grade_details[0]['total_no_of_minutes_can_be_late_in_a_month']
-						doc.reason_for_non_conformance = "There is no Log out Punch"
+						doc.reason_for_non_conformance = "Missed Log out Punch"
 						get_details = prepare_child_details(grade_details)
 						for d in get_details:
 							child_doc = doc.append('rules',{})
@@ -395,6 +402,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 						elif sign_in_with_p >= login_time and login_time > sing_in_time:
 							sub =  login_time - convert_shift_start_time
 							minutes_late_with_p = sub.seconds/60
+						f.write("logout_time--------------------"+str(logout_time)+"\n")
 						if sign_out_without_p < logout_time and logout_time < convert_shift_end_time :
 							sub =    convert_shift_end_time - logout_time
 							minutes_logout_without_p = sub.seconds/60
