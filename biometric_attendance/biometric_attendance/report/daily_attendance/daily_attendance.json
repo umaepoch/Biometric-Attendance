@@ -1,0 +1,36 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2019-07-12 20:16:34.793220", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2019-07-14 10:40:00.449280", 
+ "modified_by": "Administrator", 
+ "module": "Biometric Attendance", 
+ "name": "Daily Attendance", 
+ "owner": "Administrator", 
+ "query": "select \n  users.name as `User Code:Link/Biometric Users:100`,\n  users.user_name as `User Name:Data:150`, \n  machine.branch as `Branch:Data:150`,\n  branch.opening_time as `Branch Opening Time:Time:100`,\n  branch.closing_time as `Branch Closing Time:Time:100`, \n  cast(att.timestamp as date) as `Date:Date:100`, \n  count(*) as `Punch Count:Int:50`, \n  cast(min(att.timestamp) as Time) as `Earliest Punch:Time:100`, \n  cast(max(att.timestamp) as Time) as `Last Punch:Time:100`\nfrom \n  `tabBiometric Users` users, \n  `tabBiometric Attendance` att,\n  `tabBranch Settings` branch,\n  `tabEnrolled Users` enrolled,\n  `tabBiometric Machine` machine\nwhere \n  att.user_id = cast(substring(users.name,3) as Integer) \n  and cast(att.timestamp as date) >= %(from_date)s\n  and cast(att.timestamp as date) <= %(to_date)s\n  and machine.branch = branch.branch\n  and enrolled.parent = machine.name\n  and enrolled.user = users.name \ngroup by \n  cast(att.timestamp as date), \n  users.name\norder by\n  cast(att.timestamp as date),\n  users.user_name", 
+ "ref_doctype": "Biometric Attendance", 
+ "report_name": "Daily Attendance", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "HR Manager"
+  }, 
+  {
+   "role": "HR User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ]
+}

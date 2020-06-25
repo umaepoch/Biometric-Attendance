@@ -1,0 +1,258 @@
+<style>
+	.print-format {
+		min-height: 8.27in;
+		max-width: 11.69in;
+		padding: 0.3in;
+	}
+
+	.print-format td {
+		padding: 3px !important;
+	}
+
+	.page-break {
+		padding:0px !important;
+	}
+
+	.attendance-header {
+		background:#eee;
+		padding:2px;
+		font-weight:bold;
+		text-align:center;
+		flex:.4;
+		border-bottom:0.1em dotted black;
+	}
+
+	.attendance-column {
+		padding:2px;
+		text-align:center;
+		flex:.4;
+		border-right:0.1em dotted black;
+		border-bottom:0.1em dotted black;
+	}
+
+	.main-attendance {
+		width:100%;
+		display:flex;
+		flex-direction:row;
+		padding:10px;
+	}
+
+	.final-report-header {
+		flex:.4;
+		background: #eee !important;
+		padding: 5px;
+	}
+
+	.final-report-column {
+		padding: 5px;
+		flex:.1;
+	}
+
+	.final-summary {
+		padding-left: 10px;
+		padding-right:10px;
+		font-size:10px;
+	}
+
+	@media print {
+		.print-format {
+			padding: 0mm !important;
+		}
+		@page {
+			size: A4;
+			margin: 0mm 0mm 0mm 0mm;
+		}
+		.salary-slip-main {
+			padding-top: 10mm;
+			padding-right: 10mm;
+			padding-left: 10mm;
+			padding-bottom: 10px;
+		}
+		.main-attendance {
+			padding-top: 0px;
+			padding-bottom: 10mm;
+			padding-right: 10mm;
+			padding-left: 10mm;
+		}
+		.final-summary {
+			padding-right: 10mm;
+			padding-left: 10mm;
+			font-size:10px;
+		}
+	}
+</style>
+<!-- JS Function for Time in Seconds -->
+{% function toSeconds(t) {
+    var bits = t.split(':');
+    return bits[0]*3600 + bits[1]*60 + bits[2]*1;
+} %}
+<!-- ****************************** -->
+<!-- JS Function for Date Range -->
+{% Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+} %}
+
+{% function getDates(startDate, stopDate) {
+    var dateArray = new Array();
+    var currentDate = startDate;
+    while (currentDate <= stopDate) {
+        dateArray.push(new Date (currentDate));
+        currentDate = currentDate.addDays(1);
+    }
+    return dateArray;
+} %}
+<!-- ****************************** -->
+<section id="attendance-sheet" style="font-size:13px;font-family:calibri;">
+	{% const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; %}
+
+	{% var dt = frappe.datetime.str_to_obj(filters.date_range[0]) %}
+	{% var no_of_days = new Date(dt.getFullYear(),dt.getMonth()+1,0).getDate() %}
+	{% var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; %}
+
+	{% for(var i=0, l=data.length; i<l; i++) { %}
+		<div class="salary-slip-main" style="width:100%;">
+	
+			{% var hra = 0; %}
+			{% var cdu = 0; %}
+			{% var mal = 0; %}
+			{% var con = 0; %}
+	
+			<div style="width:100%;background:#eee !important;font-size:20px;font-weight:bolder;padding:3px;display:flex;flex-direction:row;"> 
+				<div style="flex:1;"> {%= data[i].user_name %} </div>
+				<div style="flex:.6;font-weight:bolder;text-align:right;"> {%= data[i].branch %} </div>
+			</div>
+			<hr style="margin-top:2px !important;margin-bottom:2px !important;">
+	
+		</div>
+		{% var total_P = 0 %}
+		{% var total_H = 0 %}
+		{% var total_A = 0 %}
+		<section id="attendance" style="font-size:10px;overflow:hidden;">
+			<div class="main-attendance">
+			{% if (data[i].biometric_attendance!="[]") { %}
+				{% var ba = JSON.parse(data[i].biometric_attendance) %}
+				{% var ai = 0, pd = 0 %}
+				<div style="display:flex;flex:1;flex-direction:column;">
+					<div style="flex:1;flex-direction:row;display:flex">
+						<div class="attendance-header" style="flex:1"> Date </div>
+						<div class="attendance-header"> In Time </div>
+						<div class="attendance-header"> Out Time </div>
+						<div class="attendance-header"> System Attendance </div>
+					</div>
+					{% var all_dates = getDates(frappe.datetime.str_to_obj(filters.date_range[0]), frappe.datetime.str_to_obj(filters.date_range[1])) %}
+					{% for(var a=0;a<33;a++) { %}
+						{% if (ai%11==0 && ai>0) { %}
+							</div>
+							<div style="display:flex;flex:1;flex-direction:column;">
+								<div style="flex-direction:row;display:flex;">
+									<div class="attendance-header" style="flex:1;"> Date </div>
+									<div class="attendance-header"> In Time </div>
+									<div class="attendance-header"> Out Time </div>
+									<div class="attendance-header"> System Attendance </div>
+								</div>
+						{% } %}
+						<div style="flex:1;flex-direction:row;display:flex">
+						{% if(ai<11) { %}
+							<div class="attendance-column" style="flex:1;border-left:0.1em dotted black;"> 
+						{% } else { %}
+							<div class="attendance-column" style="flex:1;"> 
+						{% } %}
+						{% if (a < all_dates.length) { %}
+								<!-- Print Date from Date Range -->
+								{% var adt = all_dates[a] %} 
+								{% var total_time = -1 %}
+								{% var total_working_time = -1 %}
+								{% var final_attendance = "A" %}
+								{% var adtstr = "".concat(days[adt.getDay()],",",adt.getDate(),"-",monthNames[adt.getMonth()],"-",adt.getFullYear()) %}
+								{%= adtstr %}
+								<!-- ************************** -->
+								<!-- Formulate Colors for Punch Time -->
+								{% var openRed = "",closeRed = "" %}
+								{% if(ba[pd]) { %}
+									{% total_working_time = Math.abs(toSeconds(ba[pd]["Opening Time"]) - toSeconds(ba[pd]["Closing Time"])) %}
+									{% var opendiff = toSeconds(ba[pd]["Entry Time"]) - toSeconds(ba[pd]["Opening Time"]) %}
+									{% var closediff = toSeconds(ba[pd]["Exit Time"]) - toSeconds(ba[pd]["Closing Time"]) %}
+									{% if(Math.abs(opendiff/60)>60) { openRed = "style=\"background:lightcyan !important;\""; } %}
+									{% if(Math.abs(closediff/60)>60) { closeRed = "style=\"background:lightcyan !important;\""; } %}
+									{% total_time = Math.abs(toSeconds(ba[pd]["Entry Time"]) - toSeconds(ba[pd]["Exit Time"])) %}
+								{% } %}
+								<!-- ************************* -->
+							</div>
+							{% if (ba[pd] && frappe.datetime.str_to_obj(ba[pd]["Date"]).getTime() === all_dates[a].getTime()) { %}
+								<div class="attendance-column" {%= openRed %}> {% if(ba[pd]) { %} {%= ba[pd]["Entry Time"] %} {% } %} </div>
+								<div class="attendance-column" {%= closeRed %}> {% if(ba[pd]) { %} {%= ba[pd]["Exit Time"] %} {% } %} </div>
+								{% if (Math.abs(total_time/total_working_time) >= .75) { %}
+									{% final_attendance = "P" %}
+									{% total_P = total_P + 1 %}
+								{% } else if (Math.abs(total_time/total_working_time) >= .4 && Math.abs(total_time/total_working_time) < .75) { %}
+									{% final_attendance = "H" %}
+									{% total_H = total_H + 1 %}
+								{% } else { %}
+									{% final_attendance = "A" %}
+									{% total_A = total_A + 1 %}
+								{% } %}
+								{% if (final_attendance == "P") { %}
+									<div class="attendance-column"> {%= final_attendance %} </div> 
+								{% } else if (final_attendance == "H") { %}
+									<div class="attendance-column" style="background:lightcyan;font-weight:700;"> {%= final_attendance %} </div> 
+								{% } else { %}
+									<div class="attendance-column" style="background:lightpink;font-weight:700;"> {%= final_attendance %} </div> 
+								{% } %}	
+								{% pd = pd + 1; %}
+							{% } else { %}
+								<div class="attendance-column" style="background:lightpink;font-weight:700;"> Absent </div>
+								<div class="attendance-column" style="background:lightpink;font-weight:700;"> Absent </div>
+								<div class="attendance-column" style="background:lightpink;font-weight:700;"> A </div>
+								{% total_A = total_A + 1 %}
+							{% } %}
+						{% } else { %}
+							</div>
+							<div class="attendance-column"> </div>
+							<div class="attendance-column"> </div>
+							<div class="attendance-column"> </div>
+						{% } %}
+						</div>
+						{% ai = ai + 1 %}
+					{% } %}
+				</div>
+			{% } %}
+			</div>
+		</section>
+		<div class="final-summary" style="display:flex;flex-direction:row;">
+			<div class="final-report-header"> Absent </div>
+			<div class="final-report-column"> {%= total_A %} </div>
+			<div class="final-report-header"> Present </div>
+			<div class="final-report-column"> {%= total_P %} </div>
+			<div class="final-report-header"> Total Off(s) Allowed </div>
+			{% var total_working_days = total_P + Math.ceil(total_H/2) %}
+			{% var total_weekly_off_allowed = Math.round(total_working_days / 7) %} 
+			<div class="final-report-column"> {%= total_weekly_off_allowed %} </div>
+			<div class="final-report-column" style="flex:.4;"> &nbsp </div>
+			<div class="final-report-column"> &nbsp </div>
+
+		</div>
+		<div class="final-summary" style="display:flex;flex-direction:row;">
+			<div class="final-report-header"> Half Day </div>
+			<div class="final-report-column"> {%= total_H %} </div>
+			<div class="final-report-header"> Total Present Days (H+P) </div>
+			<div class="final-report-column"> {%= total_working_days %} </div>
+			<div class="final-report-header"> Leave Availed </div>
+			{% var leaves = 0 %}
+			{% if (total_A > 0) { %}
+				{% leaves = 1 %}
+			{% } %}
+			<div class="final-report-column"> {%= leaves %} </div>
+			<div class="final-report-header" style="font-weight:700;"> Final Working Days </div>
+			<div class="final-report-column" style="font-weight:700;"> {%= total_weekly_off_allowed + total_working_days + leaves %} </div>
+		</div>
+		{% if (i / 2 == 0 && i > 0) { %}
+			<!-- Page Break -->
+			<div class="page-break"></div>
+			<!-- Seems to be working in Chrome Ver: 38.0.2125.111 & Chrome 43 -->
+		{% } else { %}
+			<hr style="margin-top:5px;margin-bottom:5px;">
+		{% endif %}
+	{% } %}    
+</section>

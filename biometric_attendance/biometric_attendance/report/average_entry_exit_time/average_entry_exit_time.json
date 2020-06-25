@@ -1,0 +1,33 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2019-07-12 21:34:01.386555", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2020-02-28 19:03:20.710055", 
+ "modified_by": "Administrator", 
+ "module": "Biometric Attendance", 
+ "name": "Average Entry Exit Time", 
+ "owner": "Administrator", 
+ "query": "select \n  users.name as `User Code:Link/Biometric Users:100`,\n  users.user_name as `User Name:Data:150`, \n  users.branch as `Branch:Data:100`,\n  if(users.differ_timings=1, users.allowed_entry_time, branch.opening_time) as `Opening Time:Time:100`,\n  if(users.differ_timings=1, users.allowed_exit_time, branch.closing_time) as `Closing Time:Time:100`,\n  count(if(timestampdiff(MINUTE,cast(if(users.differ_timings=1, users.allowed_entry_time, branch.opening_time) as Time), cast(att.timestamp as time)) between -30 and 60, 1, NULL)) as `Eligible Entry Counts:Int:50`,\n  count(if(timestampdiff(MINUTE,cast(if(users.differ_timings=1, users.allowed_exit_time, branch.closing_time) as Time), cast(att.timestamp as time)) between -30 and 60, 1, NULL)) as `Eligible Exit Counts:Int:50`,  \n  count(*) as `Total Count:Int:50`,  \n  sec_to_time(avg(if(timestampdiff(MINUTE,cast(if(users.differ_timings=1,users.allowed_entry_time,branch.opening_time) as Time), cast(att.timestamp as time)) between -30 and 60,time_to_sec(cast(att.timestamp as time)),NULL))) as `Average Entry Time:Time:100`,\n  sec_to_time(avg(if(timestampdiff(MINUTE,cast(if(users.differ_timings=1,users.allowed_exit_time,branch.closing_time) as Time), cast(att.timestamp as time)) between -30 and 60,time_to_sec(cast(att.timestamp as time)),NULL))) as `Average Exit Time:Time:100`\nfrom \n  `tabBiometric Users` users, \n  `tabBiometric Attendance` att,\n  `tabBranch Settings` branch\nwhere \n  att.user_id = cast(substring(users.name,3) as Integer) \n  and cast(att.timestamp as date) >= %(from_date)s\n  and cast(att.timestamp as date) <= %(to_date)s\n  and branch.branch like %(machine)s\n  and users.branch = branch.branch\ngroup by \n  branch.branch,\n  users.name", 
+ "ref_doctype": "Biometric Attendance", 
+ "report_name": "Average Entry Exit Time", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "HR Manager"
+  }, 
+  {
+   "role": "HR User"
+  }
+ ]
+}

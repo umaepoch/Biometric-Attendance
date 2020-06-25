@@ -1,0 +1,37 @@
+{
+ "add_total_row": 1, 
+ "creation": "2020-05-29 14:59:24.372539", 
+ "disable_prepared_report": 0, 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "Standard_LH", 
+ "modified": "2020-05-29 14:59:31.325448", 
+ "modified_by": "Administrator", 
+ "module": "Biometric Attendance", 
+ "name": "Attedance Rules", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "ref_doctype": "Biometric Attendance", 
+ "report_name": "Attedance Rules", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "HR Manager"
+  }, 
+  {
+   "role": "HR User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include biometric_attendance *.css
+recursive-include biometric_attendance *.csv
+recursive-include biometric_attendance *.html
+recursive-include biometric_attendance *.ico
+recursive-include biometric_attendance *.js
+recursive-include biometric_attendance *.json
+recursive-include biometric_attendance *.md
+recursive-include biometric_attendance *.png
+recursive-include biometric_attendance *.py
+recursive-include biometric_attendance *.svg
+recursive-include biometric_attendance *.txt
+recursive-exclude biometric_attendance *.pyc

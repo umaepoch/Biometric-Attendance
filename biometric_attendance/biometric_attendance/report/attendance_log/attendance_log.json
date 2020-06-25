@@ -1,0 +1,37 @@
+{
+ "add_total_row": 0, 
+ "creation": "2019-07-13 19:37:03.818978", 
+ "disable_prepared_report": 0, 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2020-06-01 11:16:02.737955", 
+ "modified_by": "Administrator", 
+ "module": "Biometric Attendance", 
+ "name": "Attendance Log", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "query": "select \n  users.employee as 'Employee ID:Data:100',\n  cast(att.timestamp as Date) as `Punch Date:Date:100`,\n  cast(att.timestamp as Time) as `Punch Time:Time:100`\nfrom \n  `tabBiometric Attendance` att,\n  `tabBiometric Users` users\nwhere \n  users.name = %(user)s\n  and att.user_id = users.name\n  and cast(att.timestamp as Date) >= %(from_date)s\n  and cast(att.timestamp as Date) <= %(to_date)s\norder by\n  cast(att.timestamp as Date),\n  cast(att.timestamp as Time)", 
+ "ref_doctype": "Biometric Attendance", 
+ "report_name": "Attendance Log", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "HR Manager"
+  }, 
+  {
+   "role": "HR User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ]
+}
