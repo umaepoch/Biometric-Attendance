@@ -152,9 +152,10 @@ def get_prepare_attendance(user_id, attnadance_record):
 							if lunchin_punch_status[0]['punch_no'] in [d['punch'] for d in attnadance_record]:
 								log_in_punch = True
 							else:
+								
 								timestamp = atn['timestamp']
 								login_time = timestamp
-								half_day = True
+								half_day = True	
 								
 						else:
 							if logout_punch_status[0]['punch_no'] in [d['punch'] for d in attnadance_record]:
@@ -202,12 +203,14 @@ def get_prepare_attendance(user_id, attnadance_record):
 					else:
 						if lunchout_punch_status[0]['punch_no'] in [at['punch'] for at in attnadance_record]:
 							if lunchin_punch_status[0]['punch_no'] in [at['punch'] for at in attnadance_record]:
-								timestamp = atn['timestamp']
-								logout_time = atn.timestamp
 								log_out_punch = True
+							else:
+								timestamp = atn['timestamp']
+								logout_time = timestamp
+								half_day = True	
+						
 						else:
-							timestamp = atn['timestamp']
-							logout_time = atn.timestamp
+							
 							log_out_punch = True
 				
 				if half_day == True:
@@ -217,6 +220,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 						minutes_late_with_p = 0
 						minutes_logout_with_p = 0
 						minutes_logout_without_p = 0
+						'''
 						if logout_time:
 							if sign_out_without_p < logout_time and logout_time < convert_shift_end_time :
 								sub =    convert_shift_end_time - logout_time
@@ -224,6 +228,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 							elif sign_out_with_p <= logout_time and logout_time < sign_out_without_p:
 								sub =    convert_shift_end_time - logout_time
 								minutes_logout_with_p = sub.seconds/60
+						'''
 						if minutes_logout_with_p < 0:
 							minutes_logout_with_p = 0
 
@@ -234,7 +239,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 					
 						doc.user_name = atn['user_name']
 						doc.user_id = atn['user_id']
-						doc.status = 'Full Day'
+						doc.status = 'Half Day'
 						doc.employee_id = get_employee[0]['employee']
 						doc.date = today
 						doc.late_punch_out_without_penalty = minutes_logout_without_p
@@ -261,6 +266,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 							child_doc.rule_value = d["rule_value"]
 					
 						doc.save()
+						doc.submit()
 				elif log_in_punch == True:
 					validat = frappe.get_list("Daily Attendance" , filters={"employee_id":get_employee[0]['employee'], "date":today}, fields=["name"])
 					if len(validat) == 0:
@@ -298,7 +304,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 					
 						doc.user_name = atn['user_name']
 						doc.user_id = atn['user_id']
-						doc.status = 'Full Day'
+						doc.status = ''
 						doc.employee_id = get_employee[0]['employee']
 						doc.date = today
 						doc.late_punch_out_without_penalty = minutes_logout_without_p
@@ -362,7 +368,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 				
 						doc.user_name = atn['user_name']
 						doc.user_id = atn['user_id']
-						doc.status = 'Full Day'
+						doc.status = ''
 						doc.employee_id = get_employee[0]['employee']
 						doc.date = today
 						doc.late_punch_out_without_penalty = minutes_logout_without_p
@@ -425,7 +431,7 @@ def get_prepare_attendance(user_id, attnadance_record):
 						
 						doc.user_name = atn['user_name']
 						doc.user_id = atn['user_id']
-						doc.status = 'Full Day'
+						doc.status = 'Present'
 						doc.employee_id = get_employee[0]['employee']
 						doc.date = today
 						doc.late_punch_out_without_penalty = minutes_logout_without_p
@@ -1010,4 +1016,13 @@ def waiting_time_prepared(waiting_time,convert_shift_end_time):
 	else:
 		addition_of_time = convert_shift_end_time
 	return addition_of_time
+def create_erp_attendance(doc, document):
+	get_employee_details = frappe.get_list("Employee", filters={"name": doc.employee_id}, fields=["employee_name","company"])
 	
+	attendance_doc = frappe.new_doc("Attendance")
+	attendance_doc.employee = doc.employee_id
+	attendance_doc.status = doc.status
+	attendance_doc.attendance_date = doc.date
+	attendance_doc.save()
+	attendance_doc.submit()
+		

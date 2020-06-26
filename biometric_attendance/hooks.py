@@ -10,11 +10,11 @@ app_icon = "octicon octicon-organization"
 app_color = "grey"
 app_email = "jayram@epochconsulting.com"
 app_license = "MIT"
-#doc_events = {
-#	"Biometric Users":{
-#		"before_save":"biometric_attendance.biometric_attendance.doctype.biometric_users.biometric_users.notification"
-#	}
-#}
+doc_events = {
+	"Daily Attendance":{
+		"before_submit":"biometric_attendance.biometric_attendance.doctype.daily_attendance.daily_attendance.create_erp_attendance"
+	}
+}
 
 #login validation for biometric 
 on_session_creation = [

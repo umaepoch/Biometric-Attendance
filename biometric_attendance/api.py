@@ -87,7 +87,7 @@ def check_attendance_leave_before_time():
 								check_after_lunch = get_after_lunch(check_next_status[0]['user_id'], today,lunchin_punch_status)
 								if len(check_after_lunch) != 0:
 									check_null_punchs = get_null_punch_after(check_after_lunch,unknown_punch)
-									f.write("check_null_punchs-------------"+str(check_null_punchs)+"\n")
+									
 									if len(check_null_punchs) != 0:
 										frappe.db.set_value("Biometric Attendance", check_null_punchs[0].name, "punch", 1)
 									else:
