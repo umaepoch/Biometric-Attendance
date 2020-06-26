@@ -2,14 +2,12 @@
 from setuptools import setup, find_packages
 #from pip.req import parse_requirements
 import re, ast
+from pip._internal.req import parse_requirements
 
 # get version from __version__ variable in biometric_attendance/__init__.py
 _version_re = re.compile(r'__version__\s+=\s+(.*)')
 
-def parse_requirements(filename):
-    """ load requirements from a pip requirements file """
-    lineiter = (line.strip() for line in open(filename))
-    return [line for line in lineiter if line and not line.startswith("#")]
+
 
 with open('biometric_attendance/__init__.py', 'rb') as f:
     version = str(ast.literal_eval(_version_re.search(
