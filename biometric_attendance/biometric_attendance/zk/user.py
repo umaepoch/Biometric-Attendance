@@ -26,8 +26,6 @@ class User(object):
         )
 
     def repack29(self): # with 02 for zk6 (size 29)
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/outout.out","a+")
-	f.write("userdata -------"+str(len(self))+'\n')
         return pack("<BHB5s8sIxBhI", 2, self.uid, self.privilege, self.password.encode(User.encoding, errors='ignore'), self.name.encode(User.encoding, errors='ignore'), self.card, int(self.group_id) if self.group_id else 0, 0, int(self.user_id))
 
     def repack73(self): #with 02 for zk8 (size73)

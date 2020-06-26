@@ -189,7 +189,7 @@ def get_data(filters):
 		if current_user_name != d["User Code"]:
 			if current_user_name:
 				current_row["biometric_attendance"] = DateTimeEncoder().encode(sorted(ba, key=lambda k: k['Date']))
-                        	total_working_days = total_P + math.ceil(total_H/2.0)
+				total_working_days = total_P + math.ceil(total_H/2.0)
 				total_weekly_off_allowed = round(total_working_days / 7.0, 0)
 				leaves = 0
 				if total_A > 0:
