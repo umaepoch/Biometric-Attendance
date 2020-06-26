@@ -4,11 +4,11 @@ from . import __version__ as app_version
 
 app_name = "biometric_attendance"
 app_title = "Biometric Attendance"
-app_publisher = "Epoch Consultancy"
+app_publisher = "Epoch"
 app_description = "Integrates Biometric Device Attendance"
 app_icon = "octicon octicon-organization"
 app_color = "grey"
-app_email = "jayram@epochconsulting.com"
+app_email = "support@epochconsulting.in"
 app_license = "MIT"
 doc_events = {
 	"Daily Attendance":{
