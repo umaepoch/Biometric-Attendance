@@ -1090,8 +1090,6 @@ class ZK(object):
         if not self.user_packet_size in [28, 72]:
             if self.verbose: print("WRN packet size would be  %i" % self.user_packet_size)
         userdata = userdata[4:]
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/outout.out","a+")
-	#f.write("userdata -------"+str(userdata.ljust())+'\n')
 	
         if self.user_packet_size == 28:
             while len(userdata) >= 28:

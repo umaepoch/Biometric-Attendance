@@ -297,7 +297,8 @@ def create_attendance(attendance, users, machine_name,records = None):
 							if a.punch > 0:
 								punch = a.punch
 							else:
-								punch_status = frappe.get_list("Punch Child", filters={"punch_type": "Check in"}, fields=["punch_no"])
+								punch_status = frappe.get_list("Punch Child", filters={"punch_type": "Check In"}, fields=["punch_no"])
+								
 								punch = punch_status[0]['punch_no']
 							attendance_doc = frappe.new_doc("Biometric Attendance")
 							attendance_doc.uid = a.uid
