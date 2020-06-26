@@ -217,7 +217,9 @@ def create_attendance(attendance, users, machine_name,records = None):
 								attendance_doc.save()
 								attendance_doc.submit()
 							else:
-								validates = frappe.get_list("Biometric Attendance", filters={"user_id": a.user_id , "date": timestamp_date, "punch": 3}, fields=["name"])
+								punch_status = frappe.get_list("Punch Child",filters= {"punch_type": "Lunch Out"}, fields=["punch_no"])
+								punch_s = punch_status[0]['punch_no']
+								validates = frappe.get_list("Biometric Attendance", filters={"user_id": a.user_id , "date": timestamp_date, "punch": punch_s}, fields=["name"])
 								if len(validates) == 0 and con_lunch_end_time >= a.timestamp:
 									
 									punch = 0

@@ -1016,11 +1016,12 @@ def waiting_time_prepared(waiting_time,convert_shift_end_time):
 	return addition_of_time
 def create_erp_attendance(doc, document):
 	get_employee_details = frappe.get_list("Employee", filters={"name": doc.employee_id}, fields=["employee_name","company"])
-	
-	attendance_doc = frappe.new_doc("Attendance")
-	attendance_doc.employee = doc.employee_id
-	attendance_doc.status = doc.status
-	attendance_doc.attendance_date = doc.date
-	attendance_doc.save()
-	attendance_doc.submit()
+	if doc.status != "" and doc.status != None:
+		attendance_doc = frappe.new_doc("Attendance")
+		attendance_doc.employee = doc.employee_id
+		attendance_doc.status = doc.status
+		attendance_doc.attendance_date = doc.date
+		attendance_doc.daily_attendance = doc.name
+		attendance_doc.save()
+		attendance_doc.submit()
 		
