@@ -174,7 +174,6 @@ def get_prepare_attendance(user_id, attnadance_record):
 
 								if sign_out_with_p <= timestamp:
 									week_late = check_week_late_log_out(user_id,today,grade_details,end_time)
-									#f.write("week_late-------logout-----"+str(week_late)+"\n")
 									if week_late['get_time_week'] == True:
 										penalty_status = "Rule Number 1"
 										validate_log_out = True
@@ -408,7 +407,6 @@ def get_prepare_attendance(user_id, attnadance_record):
 						elif sign_in_with_p >= login_time and login_time > sing_in_time:
 							sub =  login_time - convert_shift_start_time
 							minutes_late_with_p = sub.seconds/60
-						f.write("logout_time--------------------"+str(logout_time)+"\n")
 						if sign_out_without_p < logout_time and logout_time < convert_shift_end_time :
 							sub =    convert_shift_end_time - logout_time
 							minutes_logout_without_p = sub.seconds/60
