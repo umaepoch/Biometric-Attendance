@@ -40,26 +40,25 @@ def create_biometric_attendance():
 @frappe.whitelist()
 def get_employee_id():
 	reqData = json.loads(frappe.request.data)
-	print "reqData",reqData
+	#print "reqData",reqData
 	user_email = frappe.db.get_value("User", {"full_name":reqData.get("user_name")},"email")
-	print "user_email",user_email
+	#print "user_email",user_email
 	employee_id = frappe.db.get_value("Employee", {"user_id":user_email},"name")
-	print "employee_id",employee_id
+	#print "employee_id",employee_id
 	if(employee_id):
 		return employee_id
 	else:
 		return "NotEmployee"
-		
+
 @frappe.whitelist()
 def testing():
 	userFrappe="jay"
 
 	user_email = frappe.db.get_value("User", {"username":userFrappe},"email")
-	print "testing",testing
+	#print "testing",testing
 	employee_id = frappe.db.get_value("Employee", {"user_id":user_email},"name")
-	print "employee_id",employee_id
+	#print "employee_id",employee_id
 	if(employee_id):
 		return employee_id
 	else:
 		return "NotEmployee"
-
