@@ -64,9 +64,9 @@ def check_attendance_leave_before_time():
 	if all_attendance:
 		for atn in all_attendance:
 			
-			user_id = atn.user_id
+			employee_id = atn.employee_id
 			date_d = atn.date
-			employee_id = get_employee(user_id)
+			#employee_id = get_employee(user_id)
 			shift = get_shift(employee_id)
 			if shift:
 				end_time = shift[0]['end_time']
@@ -78,16 +78,16 @@ def check_attendance_leave_before_time():
 					logout_punch_status = frappe.get_list("Punch Child",filters= {"punch_type": "Check Out"}, fields=["punch_no"])
 					unknown_punch = frappe.get_list("Punch Child",filters= {"punch_type": "Unknown Punch"}, fields=["punch_no"])
 					#check for log out punch is there or not
-					check_log_out = get_logout_punch(user_id,today,logout_punch_status)
+					check_log_out = get_logout_punch(employee_id,today,logout_punch_status)
 					if len(check_log_out) == 0:
 						if shift[0]['is_lunch_punch_mandatory'] == 'Yes' or shift[0]['is_lunch_punch_mandatory'] == 'Optional':
 							#check for lunch out punch is there or not
 							lunchout_punch_status = frappe.get_list("Punch Child",filters= {"punch_type": "Lunch Out"}, fields=["punch_no"])
-							check_next_status = get_next_status(user_id,today,lunchout_punch_status)
+							check_next_status = get_next_status(employee_id,today,lunchout_punch_status)
 							if len(check_next_status) != 0:
 								lunchin_punch_status = frappe.get_list("Punch Child",filters= {"punch_type": "Lunch In"}, fields=["punch_no"])
 								#check for lunch In punch is there or not
-								check_after_lunch = get_after_lunch(check_next_status[0]['user_id'], today,lunchin_punch_status)
+								check_after_lunch = get_after_lunch(check_next_status[0]['employee_id'], today,lunchin_punch_status)
 								if len(check_after_lunch) != 0:
 									check_null_punchs = get_null_punch_after(check_after_lunch,unknown_punch)
 									#check for any unkown punch is there or not
@@ -145,7 +145,8 @@ def check_attendance_leave_before_time():
 					
 						else:
 							#if any punches done in between time then set it as logout
-							check_null_punch = get_null_punch(user_id,atn.timestamp,unknown_punch)
+							check_null_punch = get_null_punch(employee_id,atn.timestamp,unknown_punch)
+							f.write("check_null_punch------------"+str(check_null_punch)+"\n")
 							if len(check_null_punch) != 0:
 								frappe.db.set_value("Biometric Attendance", check_null_punch[0].name, "punch", 1)
 							else:
@@ -184,28 +185,29 @@ def get_attendance(today):
 	return attendance
 	
 def get_attendance_all(today):
-	all_atendance = frappe.get_list("Biometric Attendance", filters={"date":today, "punch":0}, fields=["*"])
+	check_in_punch_status = frappe.get_list("Punch Child",filters= {"punch_type": "Check In"}, fields=["punch_no"])
+	all_atendance = frappe.get_list("Biometric Attendance", filters={"date":today}, fields=["*"])
 	return all_atendance
 def get_employee(user_id):
-	get_employee = frappe.get_list("Biometric Users", filters={"name":user_id}, fields=["employee"])
+	get_employee = frappe.get_list("Biometric Users", filters={"name":user_id, "punch": check_in_punch_status[0]["punch_no"]}, fields=["employee"])
 	return get_employee
 def get_shift(employee_id):
 	get_shift_time = ""
 	if employee_id:
-		shift = frappe.get_list("Shift Assignment", filters = {"employee": employee_id[0]['employee']}, fields=["shift_type"])
+		shift = frappe.get_list("Shift Assignment", filters = {"employee": employee_id}, fields=["shift_type"])
 		if shift:
 			get_shift_time = frappe.get_list("Shift Type", filters = {"name": shift[0]['shift_type']}, fields=["*"])
 	return get_shift_time
 
-def get_next_status(user_id,today,lunchout_punch_status):
-	next_punch = frappe.get_list("Biometric Attendance", filters={"user_id":user_id, "date":today, "punch":lunchout_punch_status[0]['punch_no']}, fields=["*"])
+def get_next_status(employee_id,today,lunchout_punch_status):
+	next_punch = frappe.get_list("Biometric Attendance", filters={"employee_id":employee_id, "date":today, "punch":lunchout_punch_status[0]['punch_no']}, fields=["*"])
 	return next_punch
 
-def get_after_lunch(user_id, today,lunchin_punch_status):
-	next_punch = frappe.get_list("Biometric Attendance", filters={"user_id":user_id, "date":today, "punch":lunchin_punch_status[0]['punch_no']}, fields=["*"])
+def get_after_lunch(employee_id, today,lunchin_punch_status):
+	next_punch = frappe.get_list("Biometric Attendance", filters={"employee_id":employee_id, "date":today, "punch":lunchin_punch_status[0]['punch_no']}, fields=["*"])
 	return next_punch
-def get_logout_punch(user_id,today,logout_punch_status):
-	logout_punch = frappe.get_list("Biometric Attendance", filters={"user_id":user_id, "date":today, "punch":logout_punch_status[0]['punch_no']}, fields=["*"])
+def get_logout_punch(employee_id,today,logout_punch_status):
+	logout_punch = frappe.get_list("Biometric Attendance", filters={"employee_id":employee_id, "date":today, "punch":logout_punch_status[0]['punch_no']}, fields=["*"])
 	return logout_punch
 def waiting_time_prepared(waiting_time,convert_shift_end_time):
 	addition_of_time = ""
@@ -230,19 +232,19 @@ def get_null_punch_after(check_after_lunch,unknown_punch):
 	f.write("check_after_lunch--------------"+str(check_after_lunch)+"\n")
 	f.write("unknown_punch--------------"+str(unknown_punch)+"\n")
 	current_date = check_after_lunch[0]['timestamp'].date()
-	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where user_id = %s and punch = %s and timestamp > %s and date = %s""", (check_after_lunch[0]['user_id'],unknown_punch[0]['punch_no'], check_after_lunch[0]['timestamp'],current_date), as_dict=1)
+	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where employee_id = %s and punch = %s and timestamp > %s and date = %s""", (check_after_lunch[0]['employee_id'],unknown_punch[0]['punch_no'], check_after_lunch[0]['timestamp'],current_date), as_dict=1)
 	return null_punch
 
-def get_null_punch(user_id,timestamp,unknown_punch):
+def get_null_punch(employee_id,timestamp,unknown_punch):
 	current_date = timestamp.date()
-	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where user_id = %s and punch = %s and timestamp > %s and date = %s""", (user_id, timestamp,current_date,unknown_punch[0]['punch_no']), as_dict=1)
+	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where employee_id = %s and punch = %s and timestamp > %s and date = %s""", (employee_id,unknown_punch[0]['punch_no'], timestamp,current_date), as_dict=1)
 	return null_punch
 def get_late_lunch_in(check_next_status,unknow_punch_status):
 	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	current_date = check_next_status[0]['timestamp'].date()
 	f.write("check_next_status[0]['timestamp']----------"+str(check_next_status[0]['timestamp'])+"\n")
 
-	attendance = frappe.db.sql("""select * from `tabBiometric Attendance` where user_id = %s and punch = %s and timestamp > %s and date = %s""", (check_next_status[0]['user_id'], unknow_punch_status[0]['punch_no'],check_next_status[0]['timestamp'],current_date), as_dict=1)
+	attendance = frappe.db.sql("""select * from `tabBiometric Attendance` where employee_id = %s and punch = %s and timestamp > %s and date = %s""", (check_next_status[0]['employee_id'], unknow_punch_status[0]['punch_no'],check_next_status[0]['timestamp'],current_date), as_dict=1)
 
 	return attendance
 	
