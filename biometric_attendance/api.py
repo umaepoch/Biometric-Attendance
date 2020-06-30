@@ -19,14 +19,14 @@ import math
 import base64
 from datetime import datetime, timedelta
 import datetime
-from biometric_attendance.zk import ZK
+#from biometric_attendance.zk import ZK
 from frappe.cache_manager import clear_user_cache,clear_global_cache
 from frappe.sessions import Session, clear_sessions
 
 
 @frappe.whitelist()
 def login_feed(login_manager):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	now = datetime.datetime.now()
 	today = date.today()
 	#f.write("today-------"+str(today)+'\n')
@@ -55,7 +55,7 @@ def login_feed(login_manager):
 				raise frappe.AuthenticationError(_('There is not Attendance'))
 
 def check_attendance_leave_before_time():
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	current_datetime = datetime.datetime.now()
 	today = date.today()
@@ -146,7 +146,7 @@ def check_attendance_leave_before_time():
 						else:
 							#if any punches done in between time then set it as logout
 							check_null_punch = get_null_punch(employee_id,atn.timestamp,unknown_punch)
-							f.write("check_null_punch------------"+str(check_null_punch)+"\n")
+							#f.write("check_null_punch------------"+str(check_null_punch)+"\n")
 							if len(check_null_punch) != 0:
 								frappe.db.set_value("Biometric Attendance", check_null_punch[0].name, "punch", 1)
 							else:
@@ -228,9 +228,9 @@ def waiting_time_prepared(waiting_time,convert_shift_end_time):
 	return addition_of_time
 
 def get_null_punch_after(check_after_lunch,unknown_punch):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
-	f.write("check_after_lunch--------------"+str(check_after_lunch)+"\n")
-	f.write("unknown_punch--------------"+str(unknown_punch)+"\n")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f.write("check_after_lunch--------------"+str(check_after_lunch)+"\n")
+	#f.write("unknown_punch--------------"+str(unknown_punch)+"\n")
 	current_date = check_after_lunch[0]['timestamp'].date()
 	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where employee_id = %s and punch = %s and timestamp > %s and date = %s""", (check_after_lunch[0]['employee_id'],unknown_punch[0]['punch_no'], check_after_lunch[0]['timestamp'],current_date), as_dict=1)
 	return null_punch
