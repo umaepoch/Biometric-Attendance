@@ -7,7 +7,7 @@ import json
 from frappe import _, throw, msgprint, utils
 from frappe.utils import cint, flt, cstr, comma_or, getdate, add_days, getdate, rounded, date_diff, money_in_words
 import requests
-
+from datetime import date
 
 @frappe.whitelist()
 def hellosub(loggedInUser):
@@ -22,6 +22,8 @@ def create_biometric_attendance(reqData):
 
 	bio_aten = frappe.new_doc("Biometric Attendance")
 	bio_aten.timestamp = reqData.get("time_stamp")
+	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')
+	bio_aten.date = convert_date.date()
 	bio_aten.employee_id = reqData.get("employee_id")
 	bio_aten.source = "Mobile"
 	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')

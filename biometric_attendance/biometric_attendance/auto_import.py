@@ -208,6 +208,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 								attendance_doc.user_name = user_name
 								attendance_doc.date = timestamp_date
 								attendance_doc.source = machine_name
+								attendance_doc.employee_id = get_employee
 								#attendance_doc.punch_status = "Before Lunch"
 								i = i + 1
 								frappe.publish_realtime('import_biometric_attendance', dict(
@@ -237,6 +238,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 									attendance_doc.user_name = user_name
 									attendance_doc.date = timestamp_date
 									attendance_doc.source = machine_name
+									attendance_doc.employee_id = get_employee
 									#attendance_doc.punch_status = "After Lunch"
 									i = i + 1
 									frappe.publish_realtime('import_biometric_attendance', dict(
@@ -262,6 +264,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 									attendance_doc.user_name = user_name
 									attendance_doc.date = timestamp_date
 									attendance_doc.source = machine_name
+									attendance_doc.employee_id = get_employee
 									#attendance_doc.punch_status = "Log Out"
 									i = i + 1
 									frappe.publish_realtime('import_biometric_attendance', dict(
@@ -286,6 +289,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 									attendance_doc.user_name = user_name
 									attendance_doc.date = timestamp_date
 									attendance_doc.source = machine_name
+									attendance_doc.employee_id = get_employee
 									#attendance_doc.punch_status = ""
 									i = i + 1
 									frappe.publish_realtime('import_biometric_attendance', dict(
@@ -311,6 +315,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 							attendance_doc.user_name = user_name
 							attendance_doc.date = timestamp_date
 							attendance_doc.source = machine_name
+							attendance_doc.employee_id = get_employee
 							#attendance_doc.punch_status = "Log Out"
 							i = i + 1
 							frappe.publish_realtime('import_biometric_attendance', dict(
@@ -337,6 +342,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 							attendance_doc.user_name = user_name
 							attendance_doc.date = timestamp_date
 							attendance_doc.source = machine_name
+							attendance_doc.employee_id = get_employee
 							#attendance_doc.punch_status = "Log Out"
 							i = i + 1
 							frappe.publish_realtime('import_biometric_attendance', dict(
@@ -361,6 +367,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 							attendance_doc.user_name = user_name
 							attendance_doc.date = timestamp_date
 							attendance_doc.source = machine_name
+							attendance_doc.employee_id = get_employee
 							#attendance_doc.punch_status = "Log Out"
 							i = i + 1
 							frappe.publish_realtime('import_biometric_attendance', dict(
@@ -383,6 +390,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 							attendance_doc.user_name = user_name
 							attendance_doc.date = timestamp_date
 							attendance_doc.source = machine_name
+							attendance_doc.employee_id = get_employee
 							#attendance_doc.punch_status = ""
 							i = i + 1
 							frappe.publish_realtime('import_biometric_attendance', dict(
@@ -403,6 +411,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 					attendance_doc.user_name = user_name
 					attendance_doc.date = timestamp_date
 					attendance_doc.source = machine_name
+					attendance_doc.employee_id = get_employee
 					#attendance_doc.punch_status = ""
 					i = i + 1
 					frappe.publish_realtime('import_biometric_attendance', dict(
