@@ -14,8 +14,8 @@ def hellosub(loggedInUser):
 	return 'pong'
 
 @frappe.whitelist()
-def create_biometric_attendance():
-	reqData = json.loads(frappe.request.data)
+def create_biometric_attendance(reqData):
+	reqData = json.loads(reqData)
 	stat = {"docstatus":"","location_status":""}
 	#print "reqData json",reqData
 	is_permitted_location_temp = is_permitted_location(reqData.get("latitude"),reqData.get("longitude"),reqData.get("employee_id"))
@@ -59,9 +59,9 @@ def create_biometric_attendance():
 	return stat
 
 @frappe.whitelist()
-def get_employee_id():
-	reqData = json.loads(frappe.request.data)
+def get_employee_id(reqData):
 	#print "reqData",reqData
+	reqData = json.loads(reqData)
 	user_email = frappe.db.get_value("User", {"full_name":reqData.get("user_name")},"email")
 	#print "user_email",user_email
 	employee_id = frappe.db.get_value("Employee", {"user_id":user_email},"name")
