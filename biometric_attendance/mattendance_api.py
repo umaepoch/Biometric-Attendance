@@ -64,7 +64,7 @@ def create_biometric_attendance(reqData):
 def get_employee_id(reqData):
 	#print "reqData",reqData
 	reqData = json.loads(reqData)
-	user_email = frappe.db.get_value("User", {"full_name":reqData.get("user_name")},"email")
+	user_email = frappe.db.get_value("User", {"name":reqData.get("user_name")},"name")
 	#print "user_email",user_email
 	employee_id = frappe.db.get_value("Employee", {"user_id":user_email},"name")
 	#print "employee_id",employee_id
@@ -97,12 +97,7 @@ def is_permitted_location(latitude,longitude,employee_id):
 		#print("No permitted location data")
 		return "NoLocationSavedForThisEmployee"
 
-
-
-
-
 #testing codes
-
 @frappe.whitelist()
 def testing():
 	latitude="12.96379934"
