@@ -6,6 +6,7 @@ setup.py
 biometric_attendance/__init__.py
 biometric_attendance/api.py
 biometric_attendance/hooks.py
+biometric_attendance/mattendance_api.py
 biometric_attendance/modules.txt
 biometric_attendance/patches.txt
 biometric_attendance.egg-info/PKG-INFO
@@ -63,6 +64,12 @@ biometric_attendance/biometric_attendance/doctype/daily_attendance_child/daily_a
 biometric_attendance/biometric_attendance/doctype/enrolled_users/__init__.py
 biometric_attendance/biometric_attendance/doctype/enrolled_users/enrolled_users.json
 biometric_attendance/biometric_attendance/doctype/enrolled_users/enrolled_users.py
+biometric_attendance/biometric_attendance/doctype/permitted_location/__init__.py
+biometric_attendance/biometric_attendance/doctype/permitted_location/permitted_location.js
+biometric_attendance/biometric_attendance/doctype/permitted_location/permitted_location.json
+biometric_attendance/biometric_attendance/doctype/permitted_location/permitted_location.py
+biometric_attendance/biometric_attendance/doctype/permitted_location/test_permitted_location.js
+biometric_attendance/biometric_attendance/doctype/permitted_location/test_permitted_location.py
 biometric_attendance/biometric_attendance/doctype/punch_child/__init__.py
 biometric_attendance/biometric_attendance/doctype/punch_child/punch_child.json
 biometric_attendance/biometric_attendance/doctype/punch_child/punch_child.py
