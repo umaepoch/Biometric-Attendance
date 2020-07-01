@@ -27,14 +27,14 @@ def create_attedance():
 	#f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	#UTC_datetime_timestamp = float(current_datetime.strftime("%s"))
 	#local_datetime_converted = datetime.datetime.fromtimestamp(UTC_datetime_timestamp)
-	f.write("attnadance_record----skjdfnkasjd---------"+str(current_datetime)+"\n")
-	f.write("frappe time-----------------"+str(frappe_time)+"\n")
+	#f.write("attnadance_record----skjdfnkasjd---------"+str(current_datetime)+"\n")
+	#f.write("frappe time-----------------"+str(frappe_time)+"\n")
 	single_doc = frappe.get_single("Biometric Settings")
 	
 	attendance = frappe.db.sql("""select * from `tabBiometric Attendance` where  date = %s and docstatus=1 order by employee_id""",today ,as_dict =1)
-	f.write("attendence----------------"+str(attendance)+'\n')
+	#f.write("attendence----------------"+str(attendance)+'\n')
 	unified_attendance = get_unique_attendance(attendance)
-	f.write("unified_attendance------------------"+str(unified_attendance)+"\n")
+	#f.write("unified_attendance------------------"+str(unified_attendance)+"\n")
 	for atn in unified_attendance:
 		attnadance_record = unified_attendance[atn]
 		prepare_attendance = get_prepare_attendance(atn,attnadance_record)
@@ -83,7 +83,7 @@ def get_prepare_attendance(employee_id, attnadance_record):
 	current_datetime  = frappe.utils.data.now_datetime()
 	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 
-	f.write("attnadance_record-------------"+str(current_datetime)+"\n")
+	#f.write("attnadance_record-------------"+str(current_datetime)+"\n")
 	single_doc = frappe.get_single("Biometric Settings")
 	validate_log_in = False
 	validate_log_out = False
@@ -116,10 +116,10 @@ def get_prepare_attendance(employee_id, attnadance_record):
 		login_time = ""
 		logout_time = ""
 		half_day = False
-		f.write("currenct_date---------------"+str(current_datetime)+"\n")
-		f.write("waiting time --------------"+str(waiting_datetime)+"\n")
+		#f.write("currenct_date---------------"+str(current_datetime)+"\n")
+		#f.write("waiting time --------------"+str(waiting_datetime)+"\n")
 		if current_datetime >= waiting_datetime:
-			f.write("its comming here -------------")
+			#f.write("its comming here -------------")
 			sing_in_time = sing_in_time_without_penalty(grade_details,start_time,today)
 			sign_in_with_p = sing_in_time_with_penalty(grade_details,start_time,today)
 			sign_out_without_p = sing_out_time_without_penalty(grade_details,end_time,today)
