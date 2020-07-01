@@ -20,14 +20,21 @@ class DailyAttendance(Document):
 
 @frappe.whitelist()
 def create_attedance():
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	today = date.today()
+	current_datetime = datetime.datetime.now()
+	frappe_time = frappe.utils.data.now_datetime()
+	#f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#UTC_datetime_timestamp = float(current_datetime.strftime("%s"))
+	#local_datetime_converted = datetime.datetime.fromtimestamp(UTC_datetime_timestamp)
+	#f.write("attnadance_record----skjdfnkasjd---------"+str(current_datetime)+"\n")
+	#f.write("frappe time-----------------"+str(frappe_time)+"\n")
 	single_doc = frappe.get_single("Biometric Settings")
 	
 	attendance = frappe.db.sql("""select * from `tabBiometric Attendance` where  date = %s and docstatus=1 order by employee_id""",today ,as_dict =1)
-	
+	#f.write("attendence----------------"+str(attendance)+'\n')
 	unified_attendance = get_unique_attendance(attendance)
-
+	#f.write("unified_attendance------------------"+str(unified_attendance)+"\n")
 	for atn in unified_attendance:
 		attnadance_record = unified_attendance[atn]
 		prepare_attendance = get_prepare_attendance(atn,attnadance_record)
@@ -36,7 +43,7 @@ def create_attedance():
 	
 #arrange the attendance for each user id 
 def get_unique_attendance(attendance):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	data = {}
 	#f.write("attendance---------------------------"+str(attendance)+"\n")
 	for att in attendance:
@@ -73,9 +80,10 @@ def get_unique_attendance(attendance):
 def get_prepare_attendance(employee_id, attnadance_record):
 	
 	today = date.today()
-	current_datetime = datetime.datetime.now()
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
-	#f.write("attnadance_record-------------"+str(attnadance_record)+"\n")
+	current_datetime  = frappe.utils.data.now_datetime()
+	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+
+	#f.write("attnadance_record-------------"+str(current_datetime)+"\n")
 	single_doc = frappe.get_single("Biometric Settings")
 	validate_log_in = False
 	validate_log_out = False
@@ -108,7 +116,10 @@ def get_prepare_attendance(employee_id, attnadance_record):
 		login_time = ""
 		logout_time = ""
 		half_day = False
+		#f.write("currenct_date---------------"+str(current_datetime)+"\n")
+		#f.write("waiting time --------------"+str(waiting_datetime)+"\n")
 		if current_datetime >= waiting_datetime:
+			#f.write("its comming here -------------")
 			sing_in_time = sing_in_time_without_penalty(grade_details,start_time,today)
 			sign_in_with_p = sing_in_time_with_penalty(grade_details,start_time,today)
 			sign_out_without_p = sing_out_time_without_penalty(grade_details,end_time,today)
@@ -555,7 +566,7 @@ def prepare_child_details(grade_details):
 	data.append(datas)
 	return data
 def check_week_late(employee_id,today,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	can_be_late_in_a_week = grade_details[0]['can_be_late_in_a_week']
 	Previous_Date = datetime.datetime.today() - datetime.timedelta(days=1)
 	total_minutes = grade_details[0]['total_no_of_minutes_can_be_late_in_a_month']
@@ -632,7 +643,7 @@ def check_week_late_log_out(employee_id,today,grade_details,end_time):
 				break
 	return {"get_time_week":get_time_week,"exceed_total_minute":exceed_total_minute}
 def check_time(previouse_attendance,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -652,7 +663,7 @@ def check_time(previouse_attendance,grade_details,start_time):
 					break
 	return flag
 def check_time_for_month(previouse_attendance,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -686,7 +697,7 @@ def check_time_for_month(previouse_attendance,grade_details,start_time):
 						break
 	return {"total_no_month":total_no_month, "exceed_total_time":exceed_total_time}
 def check_time_for_month_total_minute(previouse_attendance,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -717,7 +728,7 @@ def check_time_for_month_total_minute(previouse_attendance,grade_details,start_t
 	return flag
 
 def check_time_for_month_without_p(month_attendance,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -749,7 +760,7 @@ def check_time_for_month_without_p(month_attendance,grade_details,start_time):
 	return flag
 
 def check_time_log_out(previouse_attendance,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -770,7 +781,7 @@ def check_time_log_out(previouse_attendance,grade_details,end_time):
 					break
 	return flag		
 def check_time_log_out_for_month(previouse_attendance,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -804,7 +815,7 @@ def check_time_log_out_for_month(previouse_attendance,grade_details,end_time):
 						break
 	return {"total_no_month":total_no_month, "exceed_time":exceed_time}
 def check_time_log_out_for_month_for_total(month_attendance,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -833,7 +844,7 @@ def check_time_log_out_for_month_for_total(month_attendance,grade_details,end_ti
 				
 	return flag
 def check_time_log_out_for_month_without_p(previouse_attendance,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	mydate = datetime.datetime.now()
 	cur_month = mydate.strftime("%B")
@@ -884,14 +895,14 @@ def get_month_attendance_log_out(employee_id):
 	return attendance
 
 def check_month_late(employee_id,today,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	
 	month_attendance = get_month_attendance(employee_id)
 	get_time = check_time_for_month(month_attendance,grade_details,start_time)
 
 	return get_time
 def check_month_late_for_total(employee_id,today,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	
 	month_attendance = get_month_attendance(employee_id)
 	get_time = check_time_for_month_total_minute(month_attendance,grade_details,start_time)
@@ -899,7 +910,7 @@ def check_month_late_for_total(employee_id,today,grade_details,start_time):
 	return get_time
 
 def check_month_late_without_p(employee_id,today,grade_details,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	
 	month_attendance = get_month_attendance(employee_id)
 	get_time = check_time_for_month_without_p(month_attendance,grade_details,start_time)
@@ -907,21 +918,21 @@ def check_month_late_without_p(employee_id,today,grade_details,start_time):
 	return get_time
 
 def check_month_late_log_out(employee_id,today,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	
 	month_attendance = get_month_attendance_log_out(employee_id)
 	get_time = check_time_log_out_for_month(month_attendance,grade_details,end_time)
 	
 	return get_time
 def check_month_late_log_out_for_total(employee_id,today,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	
 	month_attendance = get_month_attendance_log_out(employee_id)
 	get_time = check_time_log_out_for_month_for_total(month_attendance,grade_details,end_time)
 	
 	return get_time
 def check_month_late_log_out_without_p(employee_id,today,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	
 	month_attendance = get_month_attendance_log_out(employee_id)
 	get_time = check_time_log_out_for_month_without_p(month_attendance,grade_details,end_time)
@@ -929,7 +940,7 @@ def check_month_late_log_out_without_p(employee_id,today,grade_details,end_time)
 	return get_time
 
 def sing_in_time_without_penalty(grade_details,start_time,today):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	#today = date.today()
 	sing_in_without_penalty = grade_details[0]['sign_in_without_penalty']
 	start_time_with_today_date = str(today)+" "+str(start_time)
@@ -951,7 +962,7 @@ def sing_in_time_without_penalty(grade_details,start_time,today):
 	return addition_of_time
 
 def sing_in_time_with_penalty(grade_details,start_time,today):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	#today = date.today()
 	sing_in_with_penalty = grade_details[0]['sign_in_with_penalty']
 	start_time_with_today_date = str(today)+" "+str(start_time)
@@ -972,7 +983,7 @@ def sing_in_time_with_penalty(grade_details,start_time,today):
 		addition_of_time = start_time_with_today_date
 	return addition_of_time
 def sing_out_time_without_penalty(grade_details,end_time,today):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	#today = date.today()
 	
 	#sign_out_with_penalty = grade_details[0]['sign_out_with_penalty']
@@ -997,7 +1008,7 @@ def sing_out_time_without_penalty(grade_details,end_time,today):
 		
 	return addition_of_time
 def sing_out_time_with_penalty(grade_details,end_time,today):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	#today = date.today()
 	sign_out_with_penalty = grade_details[0]['sign_out_with_penalty']
 	start_time_with_today_date = str(today)+" "+str(end_time)

@@ -17,7 +17,7 @@ def put_machine_name_and_time():
 	machines = frappe.get_all("Biometric Machine")
 
 	#created appending msg in created file called output.out
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	#f.write("machine name -------"+str(machines)+'\n')
 	
 	for m_name in machines:
@@ -30,7 +30,7 @@ def put_machine_name_and_time():
 					'import_enabled': machine_doc.auto_import_enabled,
 					'retries': 0
 				})
-	f.close()
+	#f.close()
 	return machine_names
 
 
@@ -136,7 +136,7 @@ def attendance_doc(machine_name, manual_import):
 
 	success = False
 	today = date.today()
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	zk = ZK(machine_doc.ip_domain_address, machine_doc.port)
 	single_doc = frappe.get_single("Biometric Settings")
 	conn = zk.connect()
@@ -152,7 +152,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 	i = 0
 	single_doc = frappe.get_single("Biometric Settings")
 	
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	for a in attendance:
 		time_date = a.timestamp.date()
 		attendance_details = frappe.db.sql(""" select * from `tabBiometric Attendance` where user_id = %s and timestamp =%s and date= %s order by timestamp desc""",(a.user_id,a.timestamp,time_date), as_dict=1 )
@@ -445,7 +445,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 				attendance_doc.submit()
 			
 								
-	f.close()
+	#f.close()
 def user_doc(machine_name, manual_import):
 	if not machine_name:
 		return None
@@ -454,7 +454,7 @@ def user_doc(machine_name, manual_import):
 	machine_doc = frappe.get_doc("Biometric Machine", machine_name)
 	now = datetime.datetime.now()
 	conn = None
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	zk = ZK(machine_doc.ip_domain_address, machine_doc.port)
 	conn = zk.connect()
 	users = []
@@ -477,7 +477,7 @@ def user_doc(machine_name, manual_import):
 					user_doc.timestamp = now
 					user_doc.user_id = user.user_id
 					user_doc.save()
-	f.close()
+	#f.close()
 
 def get_attendace(user_id , timestamp):
 	today = date.today()
@@ -485,7 +485,7 @@ def get_attendace(user_id , timestamp):
 
 	return records
 def waiting_time_for_sign_in(waiting_time_login,start_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	#today = date.today()
 	#sing_in_without_penalty = grade_details[0]['sign_in_without_penalty']
 	#start_time_with_today_date = str(today)+" "+str(start_time)
