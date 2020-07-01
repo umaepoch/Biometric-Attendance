@@ -22,12 +22,19 @@ class DailyAttendance(Document):
 def create_attedance():
 	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	today = date.today()
+	current_datetime = datetime.datetime.now()
+	frappe_time = frappe.utils.data.now_datetime()
+	#f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#UTC_datetime_timestamp = float(current_datetime.strftime("%s"))
+	#local_datetime_converted = datetime.datetime.fromtimestamp(UTC_datetime_timestamp)
+	f.write("attnadance_record----skjdfnkasjd---------"+str(current_datetime)+"\n")
+	f.write("frappe time-----------------"+str(frappe_time)+"\n")
 	single_doc = frappe.get_single("Biometric Settings")
 	
 	attendance = frappe.db.sql("""select * from `tabBiometric Attendance` where  date = %s and docstatus=1 order by employee_id""",today ,as_dict =1)
-	
+	f.write("attendence----------------"+str(attendance)+'\n')
 	unified_attendance = get_unique_attendance(attendance)
-
+	f.write("unified_attendance------------------"+str(unified_attendance)+"\n")
 	for atn in unified_attendance:
 		attnadance_record = unified_attendance[atn]
 		prepare_attendance = get_prepare_attendance(atn,attnadance_record)
@@ -73,9 +80,10 @@ def get_unique_attendance(attendance):
 def get_prepare_attendance(employee_id, attnadance_record):
 	
 	today = date.today()
-	current_datetime = datetime.datetime.now()
+	current_datetime  = frappe.utils.data.now_datetime()
 	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
-	f.write("attnadance_record-------------"+"\n")
+
+	f.write("attnadance_record-------------"+str(current_datetime)+"\n")
 	single_doc = frappe.get_single("Biometric Settings")
 	validate_log_in = False
 	validate_log_out = False

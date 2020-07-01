@@ -55,9 +55,10 @@ def login_feed(login_manager):
 				raise frappe.AuthenticationError(_('There is not Attendance'))
 
 def check_attendance_leave_before_time():
-	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
-	current_datetime = datetime.datetime.now()
+	current_datetime = frappe.utils.data.now_datetime()
+	f.write("currenct date-------------------"+str(current_datetime)+"\n")
 	today = date.today()
 	attendance = get_attendance(today)
 	all_attendance = get_attendance_all(today)
