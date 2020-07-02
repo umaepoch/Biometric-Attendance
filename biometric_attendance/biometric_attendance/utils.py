@@ -10,7 +10,8 @@ def check_connection(machine_name=None):
 	if not machine_name:
 		return
 
-	from zk import ZK
+	#from zk import ZK
+	from biometric_attendance.biometric_attendance.zk import ZK
 
 	machine_doc = frappe.get_doc("Biometric Machine", machine_name)
 
