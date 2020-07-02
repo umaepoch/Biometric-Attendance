@@ -27,7 +27,7 @@ def create_biometric_attendance(reqData):
 	bio_aten.employee_id = reqData.get("employee_id")
 	bio_aten.latitude = reqData.get("latitude")
 	bio_aten.longitude = reqData.get("longitude")
-	bio_aten.location_name = reqData.get("location_name")
+	bio_aten.location_name = reqData.get("location")
 	bio_aten.source = "Mobile"
 	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')
 	bio_aten.date = convert_date.date()
