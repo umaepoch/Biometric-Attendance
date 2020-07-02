@@ -25,6 +25,9 @@ def create_biometric_attendance(reqData):
 	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')
 	bio_aten.date = convert_date.date()
 	bio_aten.employee_id = reqData.get("employee_id")
+	bio_aten.latitude = reqData.get("latitude")
+	bio_aten.longitude = reqData.get("longitude")
+	bio_aten.location_name = reqData.get("location")
 	bio_aten.source = "Mobile"
 	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')
 	bio_aten.date = convert_date.date()
@@ -73,6 +76,32 @@ def get_employee_id(reqData):
 	else:
 		return "NotEmployee"
 
+@frappe.whitelist()
+def get_location(reqData):
+	print ("reqData",reqData)
+	reqData = json.loads(reqData)
+	latitude = round(float(reqData.get("latitude")),3)
+	longitude =  round(float(reqData.get("longitude")),3)
+	lat_long_dic = frappe.db.sql("""select
+									latitude ,logitude,employee,location_name
+									from
+									`tabPermitted Location`
+									where  docstatus =1 and employee= %s""" ,
+									(reqData.get("employee_id")), as_dict=1)
+	#print("lat_long_dic",lat_long_dic)
+	if lat_long_dic :
+		loc_name_temp=""
+		for lat_long in lat_long_dic:
+			if lat_long["latitude"] == latitude and lat_long["logitude"] == longitude :
+				#print("location valid")
+				loc_name_temp =  lat_long["location_name"]
+				return loc_name_temp
+		return "InValid"
+	else: #no permitted location for this employee
+		return "NoLocationSavedForThisEmployee"
+
+
+
 def is_permitted_location(latitude,longitude,employee_id):
 	latitude = round(float(latitude),3)
 	longitude =  round(float(longitude),3)
@@ -88,10 +117,7 @@ def is_permitted_location(latitude,longitude,employee_id):
 			if lat_long["latitude"] == latitude and lat_long["logitude"] == longitude :
 				#print("location valid")
 				return "true"
-			else:
-				#print("location invalid")
-				return "false"
-
+		return "false"
 	else :
 		#no permitted location saved for this user
 		#print("No permitted location data")

@@ -58,7 +58,7 @@ def check_attendance_leave_before_time():
 	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	single_doc = frappe.get_single("Biometric Settings")
 	current_datetime = frappe.utils.data.now_datetime()
-	f.write("currenct date-------------------"+str(current_datetime)+"\n")
+	#f.write("currenct date-------------------"+str(current_datetime)+"\n")
 	today = date.today()
 	attendance = get_attendance(today)
 	all_attendance = get_attendance_all(today)
@@ -241,9 +241,9 @@ def get_null_punch(employee_id,timestamp,unknown_punch):
 	null_punch = frappe.db.sql(""" select * from `tabBiometric Attendance` where employee_id = %s and punch = %s and timestamp > %s and date = %s""", (employee_id,unknown_punch[0]['punch_no'], timestamp,current_date), as_dict=1)
 	return null_punch
 def get_late_lunch_in(check_next_status,unknow_punch_status):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	current_date = check_next_status[0]['timestamp'].date()
-	f.write("check_next_status[0]['timestamp']----------"+str(check_next_status[0]['timestamp'])+"\n")
+	#f.write("check_next_status[0]['timestamp']----------"+str(check_next_status[0]['timestamp'])+"\n")
 
 	attendance = frappe.db.sql("""select * from `tabBiometric Attendance` where employee_id = %s and punch = %s and timestamp > %s and date = %s""", (check_next_status[0]['employee_id'], unknow_punch_status[0]['punch_no'],check_next_status[0]['timestamp'],current_date), as_dict=1)
 
