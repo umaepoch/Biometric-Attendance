@@ -10,10 +10,7 @@ def check_connection(machine_name=None):
 	if not machine_name:
 		return
 
-<<<<<<< HEAD
 	#from zk import ZK
-=======
->>>>>>> b81132751965ce9822ecde9954f0bc11f855ec24
 	from biometric_attendance.biometric_attendance.zk import ZK
 
 	machine_doc = frappe.get_doc("Biometric Machine", machine_name)
@@ -94,10 +91,7 @@ def clear_machine_attendance(machine_name=None):
 
 	#from zk import ZK
 	from biometric_attendance.biometric_attendance.zk import ZK
-<<<<<<< HEAD
 
-=======
->>>>>>> b81132751965ce9822ecde9954f0bc11f855ec24
 	conn = None
 
 	machine_doc = frappe.get_doc("Biometric Machine", machine_name)

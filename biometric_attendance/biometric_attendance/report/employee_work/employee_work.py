@@ -47,7 +47,7 @@ def get_attendance_details(employee,date):
 	return attendance
 def get_prepare_details(details):
 	punch_status = frappe.get_all("Punch Child", fields={"*"})
-	print "punch-------------",punch_status
+	#print "punch-------------",punch_status
 	data = []
 	#for d in details:
 		
