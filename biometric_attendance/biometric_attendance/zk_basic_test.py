@@ -6,7 +6,11 @@ sys.path.append("zk")
 from zk import ZK, const
 
 conn = None
+<<<<<<< HEAD
 zk = ZK('192.168.1.2', port=4370, timeout=5, password=0, force_udp=False, ommit_ping=False)
+=======
+zk = ZK('49.206.10.42', port=4370, timeout=5, password=0, force_udp=False, ommit_ping=False)
+>>>>>>> b81132751965ce9822ecde9954f0bc11f855ec24
 try:
     print ('Connecting to device ...')
     conn = zk.connect()

@@ -16,6 +16,7 @@ def hellosub(loggedInUser):
 @frappe.whitelist()
 def create_biometric_attendance(reqData):
 	reqData = json.loads(reqData)
+	#print ("create ba has called",reqData)
 	stat = {"docstatus":"","location_status":""}
 	#print "reqData json",reqData
 	is_permitted_location_temp = is_permitted_location(reqData.get("latitude"),reqData.get("longitude"),reqData.get("employee_id"))
@@ -27,22 +28,13 @@ def create_biometric_attendance(reqData):
 	bio_aten.employee_id = reqData.get("employee_id")
 	bio_aten.latitude = reqData.get("latitude")
 	bio_aten.longitude = reqData.get("longitude")
-	bio_aten.location_name = reqData.get("location_name")
+	bio_aten.location_name = reqData.get("location")
 	bio_aten.source = "Mobile"
 	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')
 	bio_aten.date = convert_date.date()
-
-	if reqData.get("punch_status") == "Check In":
-		bio_aten.punch = 0
-	if reqData.get("punch_status") == "Check Out":
-		bio_aten.punch =1
-	if reqData.get("punch_status") == "Lunch Out":
-		bio_aten.punch = 2
-	if reqData.get("punch_status") == "Lunch In":
-		bio_aten.punch = 3
-	if reqData.get("punch_status") == "Unknown Punch":
-		bio_aten.punch = 10
 	bio_aten.punch_status = reqData.get("punch_status")
+	bio_aten.punch = get_punch_status_code(reqData.get("punch_status"))
+
 
 	if(is_permitted_location_temp == "true"):
 		bio_aten.is_permitted_location = "Yes"
@@ -78,7 +70,7 @@ def get_employee_id(reqData):
 
 @frappe.whitelist()
 def get_location(reqData):
-	print ("reqData",reqData)
+	#print ("reqData",reqData)
 	reqData = json.loads(reqData)
 	latitude = round(float(reqData.get("latitude")),3)
 	longitude =  round(float(reqData.get("longitude")),3)
@@ -123,7 +115,27 @@ def is_permitted_location(latitude,longitude,employee_id):
 		#print("No permitted location data")
 		return "NoLocationSavedForThisEmployee"
 
+@frappe.whitelist()
+def get_punch_status():
+	punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
+	return punch_status_list
+
+def get_punch_status_code(punch_status):
+	punch_status_list = get_punch_status()
+	punch_status_code_temp= "hello"
+	if punch_status_list:
+		for punch_status_row in punch_status_list:
+			if punch_status_row["punch_type"] == punch_status :
+				punch_status_code_temp = punch_status_row["punch_no"]
+				return punch_status_code_temp
+	return punch_status_code_temp
+	
 #testing codes
+
+@frappe.whitelist()
+def get_punch_status_testing():
+	punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
+	return punch_status_list
 @frappe.whitelist()
 def testing():
 	latitude="12.96379934"
