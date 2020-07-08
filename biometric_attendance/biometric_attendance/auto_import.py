@@ -84,7 +84,7 @@ def auto_import_for_machine(machine_name, manual_import=0):
 		do_auto_import(machine=check_time_and_get_machine(machine_name), manual_import=0)
 
 def do_auto_import(machine, manual_import=0):
-	from utils import import_attendance, clear_machine_attendance
+	from biometric_attendance.biometric_attendance.utils import import_attendance, clear_machine_attendance
 	
 	if not machine:
 		return
@@ -128,7 +128,7 @@ def send_email(success, machine, error_status=None):
 def attendance_doc(machine_name, manual_import):
 	if not machine_name:
 		return None
-	from zk import ZK
+	from biometric_attendance.biometric_attendance.zk import ZK
 
 	machine_doc = frappe.get_doc("Biometric Machine", machine_name)
 
@@ -449,7 +449,7 @@ def create_attendance(attendance, users, machine_name,records = None):
 def user_doc(machine_name, manual_import):
 	if not machine_name:
 		return None
-	from zk import ZK
+	from biometric_attendance.biometric_attendance.zk import ZK
 
 	machine_doc = frappe.get_doc("Biometric Machine", machine_name)
 	now = datetime.datetime.now()
