@@ -20,7 +20,7 @@ class DailyAttendance(Document):
 
 @frappe.whitelist()
 def create_attedance():
-	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	today = date.today()
 	current_datetime = datetime.datetime.now()
 	frappe_time = frappe.utils.data.now_datetime()
@@ -81,7 +81,7 @@ def get_prepare_attendance(employee_id, attnadance_record):
 	
 	today = date.today()
 	current_datetime  = frappe.utils.data.now_datetime()
-	f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 
 	#f.write("attnadance_record-------------"+str(current_datetime)+"\n")
 	single_doc = frappe.get_single("Biometric Settings")
@@ -608,7 +608,7 @@ def check_week_late(employee_id,today,grade_details,start_time):
 	return {"get_time_week":get_time_week,"exceed_total_minute":exceed_total_minute}
 
 def check_week_late_log_out(employee_id,today,grade_details,end_time):
-	f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
+	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
 	Previous_Date = datetime.datetime.today() - datetime.timedelta(days=1)
 	i = 0
 	can_be_late_in_a_week = grade_details[0]['can_be_late_in_a_week']
