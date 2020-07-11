@@ -125,3 +125,4 @@ biometric_attendance/config/desktop.py
 biometric_attendance/config/docs.py
 biometric_attendance/templates/__init__.py
 biometric_attendance/templates/pages/__init__.py
+biometric_attendance/templates/pages/__pycache__/__init__.py
