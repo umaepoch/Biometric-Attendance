@@ -2,28 +2,25 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Employee Work"] = {
+frappe.query_reports["Employee Work Persona"] = {
 	"filters": [
 		{
 			"fieldname":"branch",
 			"label": __("Branch"),
 			"fieldtype": "Link",
-			"options": "Branch",
-			"reqd": 1
+			"options": "Branch"
 		},
 		{
 			"fieldname":"department",
 			"label": __("Department"),
 			"fieldtype": "Link",
-			"options": "Department",
-			"reqd":1
+			"options": "Department"
 		},
 		{
 			"fieldname":"reports_to",
 			"label": __("Report To"),
 			"fieldtype": "Link",
-			"options": "Employee",
-			"reqd": 1
+			"options": "Employee"
 		},
 		{
 			"fieldname":"date",
