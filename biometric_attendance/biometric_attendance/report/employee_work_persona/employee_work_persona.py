@@ -68,10 +68,7 @@ def execute(filters=None):
 				
 					pto_out_timestamp = ""
 					pto_in_timestamp = ""
-				if pre['source'] == "Mobile":
-					location = pre.location_name
-				else:
-					location = "Office"
+				
 				status = get_status(employee,date)
 			if pto_out_timestamp == "" and pto_in_timestamp == "":
 				pass
@@ -84,8 +81,7 @@ def execute(filters=None):
 				validates = True
 	
 			total = ""
-			
-				
+	
 			if check_out_timestamp != "" and check_in_timestamp != "":
 				total = check_out_timestamp - check_in_timestamp
 			else:
@@ -108,10 +104,12 @@ def execute(filters=None):
 				total_working = total
 			if lunch_in_timestamp == "" and lunch_out_timestamp != "":
 				one_hour_less = datetime.timedelta(seconds = 3600)
-				total_working -= one_hour_less
+				if total_working != "":
+					total_working -= one_hour_less
 			if lunch_in_timestamp != "" and lunch_out_timestamp == "":
 				one_hour_less = datetime.timedelta(seconds = 3600)
-				total_working -= one_hour_less
+				if total_working != "":
+					total_working -= one_hour_less
 			total_worked = ""
 			converted = ""
 		
@@ -168,10 +166,6 @@ def execute(filters=None):
 				
 					pto_out_timestamp = ""
 					pto_in_timestamp = ""
-				if pre['source'] == "Mobile":
-					location = pre['location']
-				else:
-					location = "Office"
 			if pto_out_timestamp == "" and pto_in_timestamp == "":
 				pass
 			else:
@@ -206,10 +200,12 @@ def execute(filters=None):
 				total_working = total
 			if lunch_in_timestamp == "" and lunch_out_timestamp != "":
 				one_hour_less = datetime.timedelta(seconds = 3600)
-				total_working -= one_hour_less
+				if total_working != "":
+					total_working -= one_hour_less
 			if lunch_in_timestamp != "" and lunch_out_timestamp == "":
 				one_hour_less = datetime.timedelta(seconds = 3600)
-				total_working -= one_hour_less
+				if total_working != "":
+					total_working -= one_hour_less
 			total_worked = ""
 			converted = ""
 		
