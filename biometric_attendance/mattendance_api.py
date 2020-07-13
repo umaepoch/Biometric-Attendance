@@ -74,8 +74,11 @@ def get_employee_id(reqData):
 def get_location(reqData):
 	#print ("reqData",reqData)
 	reqData = json.loads(reqData)
-	latitude = round(float(reqData.get("latitude")),3)
-	longitude =  round(float(reqData.get("longitude")),3)
+	bset_doc = frappe.get_single("Biometric Settings")
+	precision_val = bset_doc.gps_precision
+	precision_val = int(precision_val)
+	latitude = round(float(reqData.get("latitude")),precision_val)
+	longitude =  round(float(reqData.get("longitude")),precision_val)
 	lat_long_dic = frappe.db.sql("""select
 									latitude ,logitude,employee,location_name
 									from
@@ -86,7 +89,13 @@ def get_location(reqData):
 	if lat_long_dic :
 		loc_name_temp=""
 		for lat_long in lat_long_dic:
-			if lat_long["latitude"] == latitude and lat_long["logitude"] == longitude :
+			latitude_actual = round(lat_long["latitude"],precision_val)
+			logitude_actual = round(lat_long["logitude"],precision_val)
+			print("latitude_actual:",latitude_actual)
+			print("logitude_actual:",logitude_actual)
+			print("latitude:",latitude)
+			print("longitude:",longitude)
+			if latitude_actual == latitude and logitude_actual == longitude :
 				#print("location valid")
 				loc_name_temp =  lat_long["location_name"]
 				return loc_name_temp
