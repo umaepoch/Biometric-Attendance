@@ -1,3 +1,4 @@
+from __future__ import division
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
@@ -8,6 +9,7 @@ from frappe import _, throw, msgprint, utils
 from frappe.utils import cint, flt, cstr, comma_or, getdate, add_days, getdate, rounded, date_diff, money_in_words
 import requests
 from datetime import date
+
 
 @frappe.whitelist()
 def hellosub(loggedInUser):
@@ -79,6 +81,8 @@ def get_location(reqData):
 	precision_val = int(precision_val)
 	latitude = round(float(reqData.get("latitude")),precision_val)
 	longitude =  round(float(reqData.get("longitude")),precision_val)
+	latitude_fl = float(reqData.get("latitude"))
+	longitude_fl =  float(reqData.get("longitude"))
 	lat_long_dic = frappe.db.sql("""select
 									latitude ,logitude,employee,location_name
 									from
@@ -86,6 +90,7 @@ def get_location(reqData):
 									where  docstatus =1 and employee= %s""" ,
 									(reqData.get("employee_id")), as_dict=1)
 	#print("lat_long_dic",lat_long_dic)
+	#decimal if start
 	if lat_long_dic :
 		loc_name_temp=""
 		for lat_long in lat_long_dic:
@@ -102,12 +107,44 @@ def get_location(reqData):
 		return "InValid"
 	else: #no permitted location for this employee
 		return "NoLocationSavedForThisEmployee"
+	#decimal if end
+"""
+	#per if start
+	if lat_long_dic :
+		loc_name_temp=""
+		for lat_long in lat_long_dic:
+			is_lat_valid = get_gps_accuracy_percentage (latitude_fl,lat_long["latitude"])
+			is_lon_valid = get_gps_accuracy_percentage (longitude_fl,lat_long["logitude"])
+			if is_lat_valid and is_lon_valid :
+				loc_name_temp =  lat_long["location_name"]
+				return loc_name_temp
+		return "InValid"
+	else: #no permitted location for this employee
+		return "NoLocationSavedForThisEmployee"
+	#per if end
+	"""
+
+
+
+def get_gps_accuracy_percentage(l_val,l_actaul_val):
+	percentage = 4
+	c  = ((l_actaul_val - l_val) / l_actaul_val ) * 100 <= percentage / 100
+	print("before conerting to per",(l_actaul_val - l_val) / l_actaul_val   )
+	print("after conerting to per",((l_actaul_val - l_val) / l_actaul_val ) * 100 )
+
+	print("l_val",l_val,"l_actaul_val",l_actaul_val ,"percentage",percentage / 100,"c",c)
+	return c
 
 
 
 def is_permitted_location(latitude,longitude,employee_id):
-	latitude = round(float(latitude),3)
-	longitude =  round(float(longitude),3)
+	bset_doc = frappe.get_single("Biometric Settings")
+	precision_val = bset_doc.gps_precision
+	precision_val = int(precision_val)
+	latitude_fl = float(latitude)
+	longitude_fl =  float(longitude)
+	latitude = round(latitude_fl,precision_val)
+	longitude =  round(longitude_fl,precision_val)
 	lat_long_dic = frappe.db.sql("""select
 									latitude ,logitude,employee
 									from
@@ -116,14 +153,14 @@ def is_permitted_location(latitude,longitude,employee_id):
 									(employee_id), as_dict=1)
 	#print("lat_long_dic",lat_long_dic)
 	if lat_long_dic :
+		loc_name_temp=""
 		for lat_long in lat_long_dic:
-			if lat_long["latitude"] == latitude and lat_long["logitude"] == longitude :
-				#print("location valid")
+			latitude_actual = round(lat_long["latitude"],precision_val)
+			logitude_actual = round(lat_long["logitude"],precision_val)
+			if latitude_actual == latitude and logitude_actual == longitude :
 				return "true"
 		return "false"
-	else :
-		#no permitted location saved for this user
-		#print("No permitted location data")
+	else: #no permitted location for this employee
 		return "NoLocationSavedForThisEmployee"
 
 @frappe.whitelist()
@@ -140,7 +177,7 @@ def get_punch_status_code(punch_status):
 				punch_status_code_temp = punch_status_row["punch_no"]
 				return punch_status_code_temp
 	return punch_status_code_temp
-	
+
 #testing codes
 
 @frappe.whitelist()
