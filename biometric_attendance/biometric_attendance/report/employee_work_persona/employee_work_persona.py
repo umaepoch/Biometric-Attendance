@@ -294,4 +294,3 @@ def get_prepare_attendance(attendance):
 def get_status(employee,date):
 	status = frappe.db.sql("""select * from `tabBiometric Attendance` where employee_id = %s and date =%s order by name desc limit 1 """,(employee,date), as_dict=1)
 	return status
-
