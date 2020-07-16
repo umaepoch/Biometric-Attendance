@@ -31,7 +31,7 @@ def execute(filters=None):
 	lunch_in = frappe.get_list("Punch Child",filters={"punch_type":"Lunch In"}, fields=["punch_no"])
 	pto_in = frappe.get_list("Punch Child",filters={"punch_type":"PTO In"}, fields=["punch_no"])
 	pto_out = frappe.get_list("Punch Child",filters={"punch_type":"PTO Out"}, fields=["punch_no"])
-	
+	current_datetime  = frappe.utils.data.now_datetime()
 	if employee:
 		i = 0
 		total_pots = 0
@@ -45,6 +45,7 @@ def execute(filters=None):
 		pto_out_timestamp= ""
 		pto_in_timestamp = ""
 		location = ""
+		status_id = ""
 		if len(details) != 0:
 			for pre in details:
 				if pre.punch == check_in[0]['punch_no']:
@@ -70,59 +71,91 @@ def execute(filters=None):
 					pto_in_timestamp = ""
 				
 				status = get_status(employee,date)
-			if pto_out_timestamp == "" and pto_in_timestamp == "":
-				pass
-			else:
-				validates = True
-			total_lunch = ""
-			if lunch_in_timestamp != "" and lunch_out_timestamp != "":
-				total_lunch = lunch_in_timestamp - lunch_out_timestamp 
-			else:
-				validates = True
-	
-			total = ""
-	
-			if check_out_timestamp != "" and check_in_timestamp != "":
-				total = check_out_timestamp - check_in_timestamp
-			else:
-				validates = True
-			total_lunch = ""
-			if lunch_in_timestamp != "" and lunch_out_timestamp != "":
-				total_lunch = lunch_in_timestamp - lunch_out_timestamp 
-	
-			total = ""
-			if check_out_timestamp != "" and check_in_timestamp != "":
-				total = check_out_timestamp - check_in_timestamp
-			#second = total.seconds
+				
+				if status[0].punch_status == "Check In" or status[0].punch_status == "Lunch In" or status[0].punch_status == "PTO In":
+					status_id = "At Work"
+				elif status[0].punch_status == "Lunch Out":
+					status_id = "At Lunch"
+				elif status[0].punch_status == "PTO Out":
+					status_id = "PTO"
+				elif status[0].punch_status == "Check Out":
+					status_id = "Signed out for the day"
 			employee_name = frappe.get_list("Employee", filters={"name":employee},fields=[ "employee_name","branch","department"])
-			#print "converted------------------",type(converted)
-			total_working = ""
-	
-			if total_lunch != "" and total != "":
-				total_working = total - total_lunch
-			else:
-				total_working = total
-			if lunch_in_timestamp == "" and lunch_out_timestamp != "":
-				one_hour_less = datetime.timedelta(seconds = 3600)
-				if total_working != "":
-					total_working -= one_hour_less
-			if lunch_in_timestamp != "" and lunch_out_timestamp == "":
-				one_hour_less = datetime.timedelta(seconds = 3600)
-				if total_working != "":
-					total_working -= one_hour_less
-			total_worked = ""
-			converted = ""
-		
-			converted = datetime.timedelta(seconds = total_pots)
-			if total_working != "":
+			if check_out_timestamp != "" and check_in_timestamp != "":
+				if pto_out_timestamp == "" and pto_in_timestamp == "":
+					pass
+				else:
+					validates = True
+				total_lunch = ""
+				if lunch_in_timestamp != "" and lunch_out_timestamp != "":
+					total_lunch = lunch_in_timestamp - lunch_out_timestamp 
+				elif lunch_in_timestamp == "" and lunch_out_timestamp != "":
+					validates = True
+				
+				elif lunch_in_timestamp != "" and lunch_out_timestamp == "":
+					validates = True
+				total = check_out_timestamp - check_in_timestamp
 			
-				total_worked = total_working - converted
+				total_working = ""
+				if total_lunch != "":
+					total_working = total - total_lunch
+				else:
+					total_working = total
+				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
+					one_hour_less = datetime.timedelta(seconds = 3600)
+					total_working -= one_hour_less
+				if lunch_in_timestamp != "" and lunch_out_timestamp == "":
+					one_hour_less = datetime.timedelta(seconds = 3600)
+					total_working -= one_hour_less
+		
+				converted = datetime.timedelta(seconds = total_pots)
+				if total_working != "":
+			
+					total_worked = total_working - converted
+			elif check_out_timestamp == "" and check_in_timestamp != "":
+				validates = True
+				total_worked = ""
+				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
+					total_worked = lunch_out_timestamp - check_in_timestamp
+					validates = True
+				elif lunch_in_timestamp != "" and lunch_out_timestamp != "":
+					lunch_break = lunch_in_timestamp - lunch_out_timestamp
+					total_worked = current_datetime - check_in_timestamp
+					total_worked -= lunch_break
+				if pto_out_timestamp == "" and pto_in_timestamp == "":
+					if total_pots != "":
+						converted = datetime.timedelta(seconds = total_pots)
+						if total_worked != "":
+							total_worked -= converted
+						elif total_worked == "":
+							total_worked = current_datetime - check_in_timestamp
+							total_worked -= converted
+				elif pto_out_timestamp != "" and pto_in_timestamp == "":
+					validates = True
+					if total_pots != "":
+						converted = datetime.timedelta(seconds = total_pots)
+						if total_worked != "":
+							#total_worked -= converted
+							total_worked = pto_out_timestamp - check_in_timestamp
+							pto_time = current_datetime - pto_out_timestamp
+							converted += pto_time
+							total_worked -= converted
+					
+							
+					elif total_pots == "":
+						
+						pto_time = current_datetime - pto_out_timestamp 
+						if total_worked != "":
+							total_worked -= pto_time
+						elif total_worked == "":
+							total_worked = pto_out_timestamp - check_in_timestamp
+							total_worked -= pto_time
 			complete = ""
 			if validates == True:
 				complete = 'No'
 			else:
 				complete = 'Yes'
-			data.append([employee_name[0]['employee_name'], employee,total_worked,status[0].punch_status, employee_name[0]['department'],employee_name[0]['branch'],check_in_timestamp,lunch_out_timestamp,lunch_in_timestamp,check_out_timestamp,converted,i,complete])
+			data.append([employee_name[0]['employee_name'], employee,total_worked,status_id, employee_name[0]['department'],employee_name[0]['branch'],check_in_timestamp,lunch_out_timestamp,lunch_in_timestamp,check_out_timestamp,converted,i,complete])
 	else:
 		attendance = get_attendance_list(branch,department,date)
 		prepare_attendace = get_prepare_attendance(attendance)
@@ -139,8 +172,20 @@ def execute(filters=None):
 			pto_out_timestamp= ""
 			pto_in_timestamp = ""
 			location = ""
+			converted = ""
+			total_worked = ""
 			attendance_details = prepare_attendace[ds]
 			status = get_status(ds,date)
+			status_id = ""
+			if status[0].punch_status == "Check In" or status[0].punch_status == "Lunch In" or status[0].punch_status == "PTO In":
+				status_id = "At Work"
+			elif status[0].punch_status == "Lunch Out":
+				status_id = "At Lunch"
+			elif status[0].punch_status == "PTO Out":
+				status_id = "PTO"
+			elif status[0].punch_status == "Check Out":
+				status_id = "Signed out for the day"
+			
 			for pre in attendance_details:
 				if pre['punch'] == check_in[0]['punch_no']:
 					check_in_timestamp = pre['timestamp']
@@ -166,59 +211,87 @@ def execute(filters=None):
 				
 					pto_out_timestamp = ""
 					pto_in_timestamp = ""
-			if pto_out_timestamp == "" and pto_in_timestamp == "":
-				pass
-			else:
-				validates = True
-				
-			total_lunch = ""
-			if lunch_in_timestamp != "" and lunch_out_timestamp != "":
-				total_lunch = lunch_in_timestamp - lunch_out_timestamp 
-			elif lunch_in_timestamp == "" and lunch_out_timestamp != "":
-				validates = True
-				
-			elif lunch_in_timestamp != "" and lunch_out_timestamp == "":
-				validates = True
-				
+			
+			employee_name = frappe.get_list("Employee", filters={"name": ds}, fields=["employee_name", "department","branch"])
 			total = ""
 			if check_out_timestamp != "" and check_in_timestamp != "":
+				if pto_out_timestamp == "" and pto_in_timestamp == "":
+					pass
+				else:
+					validates = True
+				total_lunch = ""
+				if lunch_in_timestamp != "" and lunch_out_timestamp != "":
+					total_lunch = lunch_in_timestamp - lunch_out_timestamp 
+				elif lunch_in_timestamp == "" and lunch_out_timestamp != "":
+					validates = True
+				
+				elif lunch_in_timestamp != "" and lunch_out_timestamp == "":
+					validates = True
 				total = check_out_timestamp - check_in_timestamp
+			
+				total_working = ""
+				if total_lunch != "":
+					total_working = total - total_lunch
+				else:
+					total_working = total
+				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
+					one_hour_less = datetime.timedelta(seconds = 3600)
+					total_working -= one_hour_less
+				if lunch_in_timestamp != "" and lunch_out_timestamp == "":
+					one_hour_less = datetime.timedelta(seconds = 3600)
+					total_working -= one_hour_less
+		
+				converted = datetime.timedelta(seconds = total_pots)
+				if total_working != "":
+			
+					total_worked = total_working - converted
 			elif check_out_timestamp == "" and check_in_timestamp != "":
 				validates = True
-				
-			elif check_out_timestamp != "" and check_in_timestamp == "":
-				validates = True
-				
-			#second = total.seconds
-			employee_name = frappe.get_list("Employee", filters={"name": ds}, fields=["employee_name", "department","branch"])
-			#print "converted------------------",type(converted)
-			total_working = ""
-			
-			if total_lunch != "" and total != "":
-				total_working = total - total_lunch
-			else:
-				total_working = total
-			if lunch_in_timestamp == "" and lunch_out_timestamp != "":
-				one_hour_less = datetime.timedelta(seconds = 3600)
-				if total_working != "":
-					total_working -= one_hour_less
-			if lunch_in_timestamp != "" and lunch_out_timestamp == "":
-				one_hour_less = datetime.timedelta(seconds = 3600)
-				if total_working != "":
-					total_working -= one_hour_less
-			total_worked = ""
-			converted = ""
-		
-			converted = datetime.timedelta(seconds = total_pots)
-			if total_working != "":
-			
-				total_worked = total_working - converted
+				total_worked = ""
+				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
+					total_worked = lunch_out_timestamp - check_in_timestamp
+					
+					validates = True
+				elif lunch_in_timestamp != "" and lunch_out_timestamp != "":
+					lunch_break = lunch_in_timestamp - lunch_out_timestamp
+					total_worked = current_datetime - check_in_timestamp
+					total_worked -= lunch_break
+				if pto_out_timestamp == "" and pto_in_timestamp == "":
+					if total_pots != "":
+						converted = datetime.timedelta(seconds = total_pots)
+						if total_worked != "":
+							total_worked -= converted
+						elif total_worked == "":
+							total_worked = current_datetime - check_in_timestamp
+							total_worked -= converted
+				elif pto_out_timestamp != "" and pto_in_timestamp == "":
+					validates = True
+					if total_pots != "":
+						converted = datetime.timedelta(seconds = total_pots)
+						if total_worked != "":
+							#total_worked -= converted
+							total_worked = pto_out_timestamp - check_in_timestamp
+							pto_time = current_datetime - pto_out_timestamp
+							converted += pto_time
+							total_worked -= converted
+					
+							
+					elif total_pots == "":
+						
+						pto_time = current_datetime - pto_out_timestamp
+						converted += pto_time
+						if total_worked != "":
+							total_worked -= pto_time
+						elif total_worked == "":
+							total_worked = pto_out_timestamp - check_in_timestamp
+							total_worked -= pto_time
+							
 			complete = ""
 			if validates == True:
 				complete = 'No'
 			else:
 				complete = 'Yes'
-			data.append([employee_name[0]['employee_name'], ds,total_worked,status[0].punch_status,
+			data.append([employee_name[0]['employee_name'], ds,total_worked,status_id,
 					employee_name[0]['department'],employee_name[0]['branch'],check_in_timestamp,
 					lunch_out_timestamp,lunch_in_timestamp,check_out_timestamp,converted,i,complete])
 
@@ -294,5 +367,3 @@ def get_prepare_attendance(attendance):
 def get_status(employee,date):
 	status = frappe.db.sql("""select * from `tabBiometric Attendance` where employee_id = %s and date =%s order by name desc limit 1 """,(employee,date), as_dict=1)
 	return status
-
-
