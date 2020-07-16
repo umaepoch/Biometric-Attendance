@@ -38,6 +38,8 @@ def create_biometric_attendance(reqData):
 	bio_aten.date = convert_date.date()
 	bio_aten.punch_status = reqData.get("punch_status")
 	bio_aten.punch = get_punch_status_code(reqData.get("punch_status"))
+	bset_doc = frappe.get_single("Biometric Settings")
+	bio_aten.gps_accuracy_method = bset_doc.gps_accuracy_method
 
 
 	if(is_permitted_location_temp == "true"):
@@ -75,6 +77,7 @@ def get_employee_id(reqData):
 @frappe.whitelist()
 def get_location(reqData):
 	#print ("reqData",reqData)
+	print("came inside get_location"   )
 	reqData = json.loads(reqData)
 	bset_doc = frappe.get_single("Biometric Settings")
 	precision_val = bset_doc.gps_precision
@@ -91,48 +94,52 @@ def get_location(reqData):
 									(reqData.get("employee_id")), as_dict=1)
 	#print("lat_long_dic",lat_long_dic)
 	#decimal if start
-	if lat_long_dic :
-		loc_name_temp=""
-		for lat_long in lat_long_dic:
-			latitude_actual = round(lat_long["latitude"],precision_val)
-			logitude_actual = round(lat_long["logitude"],precision_val)
-			print("latitude_actual:",latitude_actual)
-			print("logitude_actual:",logitude_actual)
-			print("latitude:",latitude)
-			print("longitude:",longitude)
-			if latitude_actual == latitude and logitude_actual == longitude :
-				#print("location valid")
-				loc_name_temp =  lat_long["location_name"]
-				return loc_name_temp
-		return "InValid"
-	else: #no permitted location for this employee
-		return "NoLocationSavedForThisEmployee"
+	if bset_doc.gps_accuracy_method == "Decimal":
+		if lat_long_dic :
+			loc_name_temp=""
+			for lat_long in lat_long_dic:
+				latitude_actual = round(lat_long["latitude"],precision_val)
+				logitude_actual = round(lat_long["logitude"],precision_val)
+				print("latitude_actual:",latitude_actual)
+				print("logitude_actual:",logitude_actual)
+				print("latitude:",latitude)
+				print("longitude:",longitude)
+				if latitude_actual == latitude and logitude_actual == longitude :
+					#print("location valid")
+					loc_name_temp =  lat_long["location_name"]
+					return loc_name_temp
+			return "InValid"
+		else: #no permitted location for this employee
+			return "NoLocationSavedForThisEmployee"
+
 	#decimal if end
-"""
+
 	#per if start
-	if lat_long_dic :
-		loc_name_temp=""
-		for lat_long in lat_long_dic:
-			is_lat_valid = get_gps_accuracy_percentage (latitude_fl,lat_long["latitude"])
-			is_lon_valid = get_gps_accuracy_percentage (longitude_fl,lat_long["logitude"])
-			if is_lat_valid and is_lon_valid :
-				loc_name_temp =  lat_long["location_name"]
-				return loc_name_temp
-		return "InValid"
-	else: #no permitted location for this employee
-		return "NoLocationSavedForThisEmployee"
+	if bset_doc.gps_accuracy_method == "Percentage":
+		if lat_long_dic :
+			loc_name_temp=""
+			for lat_long in lat_long_dic:
+				is_lat_valid = get_gps_accuracy_percentage (latitude_fl,lat_long["latitude"])
+				is_lon_valid = get_gps_accuracy_percentage (longitude_fl,lat_long["logitude"])
+				if is_lat_valid and is_lon_valid :
+					loc_name_temp =  lat_long["location_name"]
+					return loc_name_temp
+			return "InValid"
+		else: #no permitted location for this employee
+			return "NoLocationSavedForThisEmployee"
+
 	#per if end
-	"""
 
 
 
 def get_gps_accuracy_percentage(l_val,l_actaul_val):
-	percentage = 4
-	c  = ((l_actaul_val - l_val) / l_actaul_val ) * 100 <= percentage / 100
-	print("before conerting to per",(l_actaul_val - l_val) / l_actaul_val   )
-	print("after conerting to per",((l_actaul_val - l_val) / l_actaul_val ) * 100 )
 
-	print("l_val",l_val,"l_actaul_val",l_actaul_val ,"percentage",percentage / 100,"c",c)
+	bset_doc = frappe.get_single("Biometric Settings")
+	gps_percentage = int(bset_doc.gps_percentage)
+	test_field = int(bset_doc.percentage_test_field)
+	percentage = gps_percentage / test_field
+	c  = (abs((l_actaul_val - l_val) / l_actaul_val ) ) * 100 <= percentage
+	print("l_val",l_val,"l_actaul_val",l_actaul_val ,"percentage",percentage ,"c",c)
 	return c
 
 
@@ -143,25 +150,44 @@ def is_permitted_location(latitude,longitude,employee_id):
 	precision_val = int(precision_val)
 	latitude_fl = float(latitude)
 	longitude_fl =  float(longitude)
-	latitude = round(latitude_fl,precision_val)
-	longitude =  round(longitude_fl,precision_val)
+
 	lat_long_dic = frappe.db.sql("""select
 									latitude ,logitude,employee
 									from
 									`tabPermitted Location`
 									where  docstatus =1 and employee= %s""" ,
 									(employee_id), as_dict=1)
-	#print("lat_long_dic",lat_long_dic)
-	if lat_long_dic :
-		loc_name_temp=""
-		for lat_long in lat_long_dic:
-			latitude_actual = round(lat_long["latitude"],precision_val)
-			logitude_actual = round(lat_long["logitude"],precision_val)
-			if latitude_actual == latitude and logitude_actual == longitude :
-				return "true"
-		return "false"
-	else: #no permitted location for this employee
-		return "NoLocationSavedForThisEmployee"
+
+	#decimal start
+	if bset_doc.gps_accuracy_method == "Decimal":
+
+		latitude = round(latitude_fl,precision_val)
+		longitude =  round(longitude_fl,precision_val)
+		if lat_long_dic :
+			loc_name_temp=""
+			for lat_long in lat_long_dic:
+				latitude_actual = round(lat_long["latitude"],precision_val)
+				logitude_actual = round(lat_long["logitude"],precision_val)
+				if latitude_actual == latitude and logitude_actual == longitude :
+					return "true"
+			return "false"
+		else: #no permitted location for this employee
+			return "NoLocationSavedForThisEmployee"
+	#decimal_end
+
+	#per_start
+	if bset_doc.gps_accuracy_method == "Percentage":
+		if lat_long_dic :
+			loc_name_temp=""
+			for lat_long in lat_long_dic:
+				is_lat_valid = get_gps_accuracy_percentage (latitude_fl,lat_long["latitude"])
+				is_lon_valid = get_gps_accuracy_percentage (longitude_fl,lat_long["logitude"])
+				if is_lat_valid and is_lon_valid :
+					return "true"
+			return "false"
+		else: #no permitted location for this employee
+			return "NoLocationSavedForThisEmployee"
+	#per_end
 
 @frappe.whitelist()
 def get_punch_status():
@@ -209,6 +235,22 @@ def testing():
 
 	return "false"+ "lat " +str(latitude) + " long:" + str(longitude)
 
+@frappe.whitelist()
+def get_gps_accuracy_percentage_testing(l_val,l_actaul_val):
+	percentage = 1 / 1000
+	l_val = str(l_val)
+	l_actaul_val = str(l_actaul_val)
+	l_val = float(l_val)
+	l_actaul_val = float(l_actaul_val)
+
+	c  = (abs((l_actaul_val - l_val) / l_actaul_val ) ) * 100 <= percentage
+	print("before conerting to per",(l_actaul_val - l_val) / l_actaul_val   )
+	print("after conerting to per",((l_actaul_val - l_val) / l_actaul_val ) * 100 )
+	left_side_per =  (abs((l_actaul_val - l_val) / l_actaul_val ) ) * 100
+
+	print("l_val",l_val,"l_actaul_val",l_actaul_val ,"left_side_per",left_side_per ,"c",c)
+	return "l_val",l_val,"l_actaul_val",l_actaul_val ,"left_side_per",left_side_per ,"c",c
+
 
 """
 user testing
@@ -225,3 +267,4 @@ def testing():
 	else:
 		return "NotEmployee"
 """
+
