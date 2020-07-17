@@ -155,7 +155,7 @@ def execute(filters=None):
 				complete = 'No'
 			else:
 				complete = 'Yes'
-			data.append([employee_name[0]['employee_name'], employee,total_worked,status_id, employee_name[0]['department'],employee_name[0]['branch'],check_in_timestamp,lunch_out_timestamp,lunch_in_timestamp,check_out_timestamp,converted,i,complete])
+			data.append([employee_name[0]['employee_name'], employee,total_worked,status_id,check_in_timestamp,lunch_out_timestamp,lunch_in_timestamp,check_out_timestamp,converted,i,complete, employee_name[0]['department'],employee_name[0]['branch']])
 	else:
 		attendance = get_attendance_list(branch,department,date)
 		prepare_attendace = get_prepare_attendance(attendance)
@@ -266,7 +266,7 @@ def execute(filters=None):
 							total_worked -= converted
 				elif pto_out_timestamp != "" and pto_in_timestamp == "":
 					validates = True
-					if total_pots != "":
+					if total_pots != 0:
 						converted = datetime.timedelta(seconds = total_pots)
 						if total_worked != "":
 							#total_worked -= converted
@@ -274,12 +274,16 @@ def execute(filters=None):
 							pto_time = current_datetime - pto_out_timestamp
 							converted += pto_time
 							total_worked -= converted
-					
+						elif total_worked == "": 
+							pto_time = current_datetime - pto_out_timestamp
+							total_worked = pto_out_timestamp - check_in_timestamp
+							total_worked -= pto_time
+							converted += pto_time
 							
-					elif total_pots == "":
+					elif total_pots == 0:
 						
 						pto_time = current_datetime - pto_out_timestamp
-						converted += pto_time
+						converted = pto_time
 						if total_worked != "":
 							total_worked -= pto_time
 						elif total_worked == "":
@@ -291,9 +295,9 @@ def execute(filters=None):
 				complete = 'No'
 			else:
 				complete = 'Yes'
-			data.append([employee_name[0]['employee_name'], ds,total_worked,status_id,
-					employee_name[0]['department'],employee_name[0]['branch'],check_in_timestamp,
-					lunch_out_timestamp,lunch_in_timestamp,check_out_timestamp,converted,i,complete])
+			data.append([employee_name[0]['employee_name'], ds,total_worked,status_id,check_in_timestamp,
+					lunch_out_timestamp,lunch_in_timestamp,check_out_timestamp,converted,i,complete,
+					employee_name[0]['department'],employee_name[0]['branch']])
 
 	return columns, data
 
@@ -303,15 +307,15 @@ def get_columns():
 		_("Employee ID") + ":Link/Employee:150",
 		_("Total Hours Signed In") + "::150",
 		_("Current Status") + "::150",
-		_("Department") + "::150",
-		_("Branch") + "::150",
 		_("Check In") + "::150",
 		_("Lunch Out") + "::180",
 		_("Lunch In") + "::150",
 		_("Check Out") + "::150",
 		_("Total PTO Time Taken") + "::150",
 		_("Number of PTOs") + "::150",
-		_("Complete In and out") + "::200"
+		_("Complete In and out") + "::200",
+		_("Department") + "::150",
+		_("Branch") + "::150"
 		]
 def get_attendance_details(employee,date,filters):
 	branch = filters.get("branch")
