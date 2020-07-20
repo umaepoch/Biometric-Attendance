@@ -236,6 +236,17 @@ def testing():
 	return "false"+ "lat " +str(latitude) + " long:" + str(longitude)
 
 @frappe.whitelist()
+def get_client_session_timeout():
+	bset_doc = frappe.get_single("Biometric Settings")
+	s_time = int(bset_doc.matendance_session_timeout)
+	if s_time:
+		return s_time
+	else:
+		return 2
+	
+	
+
+@frappe.whitelist()
 def get_gps_accuracy_percentage_testing(l_val,l_actaul_val):
 	percentage = 1 / 1000
 	l_val = str(l_val)
@@ -267,4 +278,3 @@ def testing():
 	else:
 		return "NotEmployee"
 """
-
