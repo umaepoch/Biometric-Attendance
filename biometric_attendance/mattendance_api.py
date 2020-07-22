@@ -190,12 +190,54 @@ def is_permitted_location(latitude,longitude,employee_id):
 	#per_end
 
 @frappe.whitelist()
-def get_punch_status():
-	punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
+def get_punch_status(employee_id):
+	#later we have to remove dynamic punch label by punch codes
+	#punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
+	last_punch_status = get_last_punch_status(employee_id)
+	if last_punch_status == "Check In":
+		punch_status_list = ["PTO Out","Lunch Out","Check Out"]
+	elif last_punch_status == "PTO In":
+		lunchdone = is_punchStatus_done(employee_id,"Lunch In")
+		if lunchdone:
+			punch_status_list = ["PTO Out","Check Out"]
+		else:
+			punch_status_list = ["PTO Out","Lunch Out","Check Out"]
+	elif last_punch_status == "Lunch In":
+		punch_status_list = ["PTO Out","Check Out"]
+	elif last_punch_status == "PTO Out":
+		punch_status_list = ["PTO In"]
+	elif last_punch_status == "Lunch Out":
+		punch_status_list = ["Lunch In"]
+	elif last_punch_status == "Check Out":
+		punch_status_list = ["Check In"]
 	return punch_status_list
 
+@frappe.whitelist()
+def get_last_punch_status(employee_id):
+	last_punch_status = "NO_PUNCH_STATUS"
+	today_date = utils.today()
+	print "today_date",today_date
+	last_punch_status_list = frappe.db.sql("""select name,punch_status,timestamp,date from `tabBiometric Attendance` where date = %s and employee_id = %s order by timestamp desc limit 1""",(today_date,employee_id),as_dict=1)
+	if last_punch_status_list:
+		last_punch_status = last_punch_status_list[0]["punch_status"]
+	return last_punch_status
+
+@frappe.whitelist()
+def is_punchStatus_done(employee_id,punch_status):
+	today_date = utils.today()
+	is_punchStatus_done = frappe.db.sql("""select name,punch_status from `tabBiometric Attendance` where date = %s and employee_id = %s  and punch_status=%s""",(today_date,employee_id,punch_status),as_dict=1)
+	print "is_punchStatus_done",is_punchStatus_done
+	if is_punchStatus_done:
+		return True
+	else:
+		return False
+
+
+
+
+
 def get_punch_status_code(punch_status):
-	punch_status_list = get_punch_status()
+	punch_status_list = get_punch_status_list()
 	punch_status_code_temp= "hello"
 	if punch_status_list:
 		for punch_status_row in punch_status_list:
@@ -204,7 +246,13 @@ def get_punch_status_code(punch_status):
 				return punch_status_code_temp
 	return punch_status_code_temp
 
+def get_punch_status_list():
+	punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
+	return punch_status_list
+
 #testing codes
+
+
 
 @frappe.whitelist()
 def get_punch_status_testing():
@@ -243,8 +291,8 @@ def get_client_session_timeout():
 		return s_time
 	else:
 		return 2
-	
-	
+
+
 
 @frappe.whitelist()
 def get_gps_accuracy_percentage_testing(l_val,l_actaul_val):
@@ -278,3 +326,4 @@ def testing():
 	else:
 		return "NotEmployee"
 """
+
