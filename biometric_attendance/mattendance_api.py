@@ -209,8 +209,11 @@ def get_punch_status(employee_id):
 		punch_status_list = ["PTO In"]
 	elif last_punch_status == "Lunch Out":
 		punch_status_list = ["Lunch In"]
-	elif last_punch_status == "Check Out" or last_punch_status == "NO_PUNCH_STATUS" :
+	elif  last_punch_status == "NO_PUNCH_STATUS" :
 		punch_status_list = ["Check In"]
+	elif  last_punch_status == "Check Out" :
+		punch_status_list = []
+	
 	return punch_status_list
 
 
