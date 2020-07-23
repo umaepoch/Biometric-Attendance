@@ -216,7 +216,7 @@ def get_punch_status(employee_id):
 def get_last_punch_status(employee_id):
 	last_punch_status = "NO_PUNCH_STATUS"
 	today_date = utils.today()
-	print "today_date",today_date
+	#print "today_date",today_date
 	last_punch_status_list = frappe.db.sql("""select name,punch_status,timestamp,date from `tabBiometric Attendance` where date = %s and employee_id = %s order by timestamp desc limit 1""",(today_date,employee_id),as_dict=1)
 	if last_punch_status_list:
 		last_punch_status = last_punch_status_list[0]["punch_status"]
@@ -226,7 +226,7 @@ def get_last_punch_status(employee_id):
 def is_punchStatus_done(employee_id,punch_status):
 	today_date = utils.today()
 	is_punchStatus_done = frappe.db.sql("""select name,punch_status from `tabBiometric Attendance` where date = %s and employee_id = %s  and punch_status=%s""",(today_date,employee_id,punch_status),as_dict=1)
-	print "is_punchStatus_done",is_punchStatus_done
+	#print "is_punchStatus_done",is_punchStatus_done
 	if is_punchStatus_done:
 		return True
 	else:
