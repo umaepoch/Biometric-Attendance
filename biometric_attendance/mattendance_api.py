@@ -194,6 +194,7 @@ def get_punch_status(employee_id):
 	#later we have to remove dynamic punch label by punch codes
 	#punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
 	last_punch_status = get_last_punch_status(employee_id)
+	print("last_punch_status",last_punch_status)
 	if last_punch_status == "Check In":
 		punch_status_list = ["PTO Out","Lunch Out","Check Out"]
 	elif last_punch_status == "PTO In":
@@ -208,11 +209,11 @@ def get_punch_status(employee_id):
 		punch_status_list = ["PTO In"]
 	elif last_punch_status == "Lunch Out":
 		punch_status_list = ["Lunch In"]
-	elif last_punch_status == "Check Out":
+	elif last_punch_status == "Check Out" or last_punch_status == "NO_PUNCH_STATUS" :
 		punch_status_list = ["Check In"]
 	return punch_status_list
 
-@frappe.whitelist()
+
 def get_last_punch_status(employee_id):
 	last_punch_status = "NO_PUNCH_STATUS"
 	today_date = utils.today()
@@ -326,4 +327,3 @@ def testing():
 	else:
 		return "NotEmployee"
 """
-
