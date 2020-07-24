@@ -18,7 +18,7 @@ def hellosub(loggedInUser):
 @frappe.whitelist()
 def create_biometric_attendance(reqData):
 	reqData = json.loads(reqData)
-	print ("create ba has called",reqData)
+	#print "create ba has s called",reqData
 	stat = {"docstatus":"","location_status":""}
 	#print "reqData json",reqData
 	employee_user_id = frappe.db.get_value("Employee", {"name":reqData.get("employee_id")},"user_id")
@@ -33,6 +33,8 @@ def create_biometric_attendance(reqData):
 	bio_aten.latitude = reqData.get("latitude")
 	bio_aten.longitude = reqData.get("longitude")
 	bio_aten.location_name = reqData.get("location")
+	bio_aten.address_display = reqData.get("address_str")
+	
 	bio_aten.source = "Mobile"
 	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')
 	bio_aten.date = convert_date.date()
