@@ -34,7 +34,7 @@ def create_biometric_attendance(reqData):
 	bio_aten.longitude = reqData.get("longitude")
 	bio_aten.location_name = reqData.get("location")
 	bio_aten.address_display = reqData.get("address_str")
-	
+
 	bio_aten.source = "Mobile"
 	convert_date = datetime.datetime.strptime( reqData.get("time_stamp"), '%Y-%m-%d %H:%M:%S')
 	bio_aten.date = convert_date.date()
@@ -215,7 +215,7 @@ def get_punch_status(employee_id):
 		punch_status_list = ["Check In"]
 	elif  last_punch_status == "Check Out" :
 		punch_status_list = []
-	
+
 	return punch_status_list
 
 
@@ -298,7 +298,21 @@ def get_client_session_timeout():
 	else:
 		return 2
 
+@frappe.whitelist()
+def device_id_validation_updation(user_id,device_id,action):
+	print("from device_id_validation_updation user_id:",user_id,"device_id",device_id,"action",action)
+	employee_user_id = frappe.db.get_value("Employee", {"user_id":user_id},"name")
+	employee_doc = frappe.get_doc("Employee", employee_user_id)
 
+	if action == "updation" :
+		employee_doc.pch_device_id =  device_id
+		employee_doc.save(ignore_permissions=True)
+		return "updated"
+	else:
+		if employee_doc.pch_device_id:
+			return "true" if device_id == employee_doc.pch_device_id else "false"
+		else:
+			return "no_device_id"
 
 @frappe.whitelist()
 def get_gps_accuracy_percentage_testing(l_val,l_actaul_val):
@@ -332,3 +346,4 @@ def testing():
 	else:
 		return "NotEmployee"
 """
+
