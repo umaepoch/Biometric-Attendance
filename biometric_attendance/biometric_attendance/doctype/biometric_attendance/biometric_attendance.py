@@ -34,7 +34,7 @@ def add_log_based_on_employee_field():
 		attendance_doc.timestamp = timestamp
 		attendance_doc.punch = punch
 		attendance_doc.status = Status
-		attendance_doc.date = timestamp_date
+		#attendance_doc.date = timestamp_date
 		attendance_doc.source = device_name
 		#attendance_doc.punch_status = "Before Lunch"
 	
