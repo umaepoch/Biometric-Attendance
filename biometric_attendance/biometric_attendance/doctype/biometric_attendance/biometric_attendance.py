@@ -78,7 +78,7 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
     else:
         punch = 10
         Status = "Unknown"
-    attendance_doc.user_id = user_id
+    attendance_doc.user_id = employee_field_value
     attendance_doc.timestamp = timestamp
     attendance_doc.punch = punch
     attendance_doc.status = Status
