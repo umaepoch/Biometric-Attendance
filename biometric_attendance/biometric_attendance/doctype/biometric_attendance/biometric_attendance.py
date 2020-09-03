@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 import requests
 import json
+import datetime
 
 class BiometricAttendance(Document):
 	pass
@@ -60,13 +61,13 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 
     if not employee_field_value or not timestamp:
         frappe.throw(_("'employee_field_value' and 'timestamp' are required."))
-    '''
+    
     employee = frappe.db.get_values("Employee", {employee_fieldname: employee_field_value}, ["name", "employee_name", employee_fieldname], as_dict=True)
     if employee:
-    employee = employee[0]
+        employee = employee[0]
     else:
-    frappe.throw(_("No Employee found for the given employee field value. '{}': {}").format(employee_fieldname,employee_field_value))
-    '''
+        frappe.throw(_("No Employee found for the given employee field value. '{}': {}").format(employee_fieldname,employee_field_value))
+    
     punch = 0
     Status = ""
     if log_type == "IN":
@@ -78,16 +79,22 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
     else:
         punch = 10
         Status = "Unknown"
-    attendance_doc = frappe.new_doc("Biometric Attendance")
-    attendance_doc.user_id = employee_field_value
-    attendance_doc.timestamp = timestamp
-    attendance_doc.punch = punch
-    attendance_doc.status = Status
-    #attendance_doc.date = timestamp_date
-    attendance_doc.source = device_id
-    attendance_doc.save()
-    attendance_doc.submit()
-    if attendance_doc.name:
-        return "Success"
-    else:
-        return  False
+    date_time_obj = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
+    time_date = date_time_obj.date()
+    attendance_details = frappe.db.sql(""" select * from `tabBiometric Attendance` where users_id = %s and timestamp =%s and date= %s order by timestamp desc""",(employee_field_value,timestamp,time_date), as_dict=1 )
+    if len(attendance_details) == 0:
+	    attendance_doc = frappe.new_doc("Biometric Attendance")
+	    attendance_doc.users_id = employee_field_value
+	    attendance_doc.timestamp = timestamp
+	    attendance_doc.punch = punch
+	    attendance_doc.status = Status
+	    attendance_doc.date = time_date
+	    attendance_doc.employee_id = employee[0].name
+	    attendance_doc.user_name = employee[0].user_name
+	    attendance_doc.source = device_id
+	    attendance_doc.save()
+	    attendance_doc.submit()
+	    if attendance_doc.name:
+                return "Success"
+	    else:
+                return  False
