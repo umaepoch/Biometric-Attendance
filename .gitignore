@@ -2,5 +2,6 @@
 *.pyc
 *.egg-info
 *.swp
+*.out
 tags
-nhance/docs/current
+biometric_attendance/docs/current
