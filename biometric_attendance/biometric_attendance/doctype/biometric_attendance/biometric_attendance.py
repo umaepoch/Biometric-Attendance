@@ -79,7 +79,7 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
     else:
         punch = 10
         Status = "Unknown"
-    date_time_obj = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
+    date_time_obj = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
     time_date = date_time_obj.date()
     attendance_details = frappe.db.sql(""" select * from `tabBiometric Attendance` where users_id = %s and timestamp =%s and date= %s order by timestamp desc""",(employee_field_value,timestamp,time_date), as_dict=1 )
     if len(attendance_details) == 0:
