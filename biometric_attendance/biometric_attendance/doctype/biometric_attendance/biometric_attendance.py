@@ -92,8 +92,8 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	    attendance_doc.punch = punch
 	    attendance_doc.status = Status
 	    attendance_doc.date = time_date
-	    attendance_doc.employee_id = employee[0].name
-	    attendance_doc.user_name = employee[0].user_name
+	    attendance_doc.employee_id = employee.name
+	    attendance_doc.user_name = employee.user_name
 	    attendance_doc.source = device_id
 	    attendance_doc.save()
 	    attendance_doc.submit()
