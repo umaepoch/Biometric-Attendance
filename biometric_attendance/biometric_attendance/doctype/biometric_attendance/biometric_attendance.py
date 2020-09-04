@@ -49,6 +49,7 @@ def add_log_based_on_employee_field():
 '''
 @frappe.whitelist()
 def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=None, log_type=None, skip_auto_attendance=0, employee_fieldname='attendance_device_id'):
+    f= open("/home/mdpy27/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
     """Finds the relevant Employee using the employee field value and creates a Employee Checkin.
 
     :param employee_field_value: The value to look for in employee field.
@@ -82,6 +83,7 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
     date_time_obj = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
     time_date = date_time_obj.date()
     attendance_details = frappe.db.sql(""" select * from `tabBiometric Attendance` where users_id = %s and timestamp =%s and date= %s order by timestamp desc""",(employee_field_value,timestamp,time_date), as_dict=1 )
+    f.write("attendance_details----------------"+str(attendance_details)+'\n')
     if len(attendance_details) == 0:
 	    attendance_doc = frappe.new_doc("Biometric Attendance")
 	    attendance_doc.users_id = employee_field_value
