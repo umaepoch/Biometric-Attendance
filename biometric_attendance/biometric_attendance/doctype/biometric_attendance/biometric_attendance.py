@@ -51,6 +51,8 @@ def add_log_based_on_employee_field():
 def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=None, log_type=None, skip_auto_attendance=0, employee_fieldname='attendance_device_id'):
     f= open("/home/mmpy3/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
     f.write("employee_field_value----------------"+str(employee_field_value)+'\n')
+    f.write("log_type----------------"+str(log_type)+'\n')
+   
     """Finds the relevant Employee using the employee field value and creates a Employee Checkin.
 
     :param employee_field_value: The value to look for in employee field.
@@ -100,4 +102,6 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	    if attendance_doc.name:
                 return "Success"
 	    else:
-                return  False
+                return  "Fail"
+   else:
+	return "Fail"
