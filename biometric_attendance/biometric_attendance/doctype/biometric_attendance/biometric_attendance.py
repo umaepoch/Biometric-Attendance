@@ -103,5 +103,5 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
                 return "Success"
 	    else:
                 return  "Fail"
-   else:
-	return "Fail"
+    else:
+        return "Fail"
