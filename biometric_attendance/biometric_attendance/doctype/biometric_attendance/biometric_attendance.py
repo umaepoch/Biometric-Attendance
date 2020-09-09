@@ -99,7 +99,7 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	    attendance_doc.source = device_id
 	    attendance_doc.save()
 	    attendance_doc.submit()
-	   
-            return attendance_doc
+
+	    return "Success"
 	    
     
