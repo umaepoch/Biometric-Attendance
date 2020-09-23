@@ -11,6 +11,7 @@ import requests
 from datetime import date
 
 
+
 @frappe.whitelist()
 def hellosub(loggedInUser):
 	return 'pong'
