@@ -24,6 +24,7 @@ from frappe.cache_manager import clear_user_cache,clear_global_cache
 from frappe.sessions import Session, clear_sessions
 
 
+
 @frappe.whitelist()
 def login_feed(login_manager):
 	#f= open("/home/frappe/frappe-bench/apps/biometric_attendance/biometric_attendance/biometric_attendance/output.out","a+")
