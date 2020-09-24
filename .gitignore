@@ -1,6 +1,7 @@
 .DS_Store
 *.pyc
 *.egg-info
+__pycache__
 *.swp
 tags
 biometric_attendance/docs/current
