@@ -100,6 +100,8 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	    attendance_doc.save()
 	    attendance_doc.submit()
 
-	    return {'message':attendance_doc}
+	    return "Success"
+    else:
+	return "Failed"
 	    
     
