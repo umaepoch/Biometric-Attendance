@@ -103,5 +103,54 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	    return "Success"
     else:
         return "Failed"
+
+
+#suresh_changes
+@frappe.whitelist()
+def get_proper_dat_time(date_str):
+	converted_date = datetime.datetime.strptime( date_str, '%Y-%m-%d %H:%M:%S')
+	return get_formatted()
+
+@frappe.whitelist()
+def get_full_user_name(employee_user_id):
+	user_full_name = frappe.db.get_value("User", {"name":employee_user_id},"full_name")
+	return user_full_name
+
+@frappe.whitelist()
+def get_punch_status_list():
+	punch_status_temp_list=[]
+	punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
+	for punch_status in punch_status_list:
+		punch_status_temp_list.append(punch_status["punch_type"])
+	return punch_status_temp_list
+
+@frappe.whitelist()
+def get_punch_status_code(punch_status):
+	punch_status_list = get_punch_status_list_adv()
+	punch_status_code_temp= "hello"
+	if punch_status_list:
+		for punch_status_row in punch_status_list:
+			if punch_status_row["punch_type"] == punch_status :
+				punch_status_code_temp = punch_status_row["punch_no"]
+				return punch_status_code_temp
+	return punch_status_code_tem
+
+def get_punch_status_list_adv():
+	punch_status_list = frappe.db.sql("""select punch_type,punch_no from `tabPunch Child` where parent  ='P-S-00001'""",as_dict=1)
+	return punch_status_list
+
+@frappe.whitelist()
+def get_employee_id(user_id):
+	#print "reqData",reqData
+	user_email = frappe.db.get_value("User", {"name":user_id},"name")
+	#print "user_email",user_email
+	employee_id = frappe.db.get_value("Employee", {"user_id":user_email},"name")
+	#print "employee_id",employee_id
+	if(employee_id):
+		return employee_id
+	else:
+		return 0
+
+
 	    
     
