@@ -11,7 +11,7 @@ frappe.ui.form.on('Biometric Attendance', {
 
 		set_user_full_name()
 		cur_frm.set_value("timestamp", frappe.datetime.now_datetime());
-		cur_frm.set_value("source", "ErpNext Web");
+		cur_frm.set_value("source", "ERPNext Web");
 		cur_frm.set_value("is_permitted_location", "Not Applicable");
 
 
