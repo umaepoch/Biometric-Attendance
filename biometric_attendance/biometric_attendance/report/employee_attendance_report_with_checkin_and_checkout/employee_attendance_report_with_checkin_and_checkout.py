@@ -1,6 +1,3 @@
-# Copyright (c) 2013, Epoch and contributors
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 from os import O_DSYNC
 import frappe
@@ -37,14 +34,17 @@ def execute(filters=None):
 	current_time = current_datetime.strftime("%H:%M:%S")
 	datetime_al = str(from_date)+" "+str(current_time)
 	convert = datetime.datetime.strptime(datetime_al, '%Y-%m-%d %H:%M:%S')
-	details = get_attendance_details(employee,from_date,to_date,filters)
-	#print("details",details)
-	prepare_details = get_prepare_details(details)
-	#print("prepare_details",prepare_details)
 	
-	
-	if employee:
-		i = 0
+	attendance = fetching_previous_day_attendance_details(filters)
+	#print("atttendance",attendance)
+	employee_checkin=fetching_checkin_attendance_details(filters)
+	#print("employee_checkin",employee_checkin)
+	result_set=attendance+employee_checkin
+	#print("combined dict",result_set)
+	prepare_attendace = get_prepare_attendance_1(result_set)
+	#print("prepare_attendence",prepare_attendace)
+	for ds in prepare_attendace:
+		i =0
 		total_pots = 0
 		validates = False
 		lunch_missed_in = False
@@ -56,285 +56,128 @@ def execute(filters=None):
 		pto_out_timestamp= ""
 		pto_in_timestamp = ""
 		location = ""
-		status_id = ""
-		if len(details) != 0:
-			for pre in details:
-				if pre.punch == check_in[0]['punch_no']:
-					check_in_timestamp = pre.timestamp
-				elif pre.punch == check_out[0]['punch_no']:
-					check_out_timestamp =  pre.timestamp
-				elif pre.punch == lunch_in[0]['punch_no']:
-					lunch_in_timestamp =  pre.timestamp
-				elif pre.punch == lunch_out[0]['punch_no']:
-					lunch_out_timestamp =  pre.timestamp
-				elif pre.punch == pto_out[0]['punch_no']:
-					pto_out_timestamp =  pre.timestamp
-
-				elif pre.punch == pto_in[0]['punch_no']:
-					i +=1
-					pto_in_timestamp =  pre.timestamp
-				if pto_out_timestamp != "" and pto_in_timestamp != "":
-					total_pot = pto_in_timestamp - pto_out_timestamp
-					seconds = total_pot.seconds
-					total_pots += seconds
-
-					pto_out_timestamp = ""
-					pto_in_timestamp = ""
-
-				status = get_status(employee,filters)
-
-				if status[0].punch_status == "Check In" or status[0].punch_status == "Lunch In" or status[0].punch_status == "PTO In":
-					status_id = "At Work"
-				elif status[0].punch_status == "Lunch Out":
-					status_id = "At Lunch"
-				elif status[0].punch_status == "PTO Out":
-					status_id = "PTO"
-				elif status[0].punch_status == "Check Out":
-					status_id = "Signed out for the day"
-			employee_name = frappe.get_list("Employee", filters={"name":employee},fields=[ "employee_name","branch","department"])
-			if check_out_timestamp == "":
-				datetime_end = str(to_date)+" 23:59:59"
-				convert_end = datetime.datetime.strptime(datetime_end, '%Y-%m-%d %H:%M:%S')
-				if current_datetime >= convert_end:
-					check_out_timestamp = convert_end
-					status_id = "Signed out for the day"
-
-			if check_out_timestamp != "" and check_in_timestamp != "":
-				if pto_out_timestamp == "" and pto_in_timestamp == "":
-					pass
+		converted = ""
+		total_worked = ""
+		#print("--------",prepare_attendace[ds][0]['empployee_id'])
+		attendance_details = prepare_attendace[ds]
+		#print("attendence_details",attendance_details)
+		#print("attendance_details lenght",len(attendance_details))
+	
+		if (len(attendance_details)==2):
+			#print("+++++++++++++++++++++++=========")
+			if ( (attendance_details[0]['punch']==attendance_details[1]['punch']==1) ):
+				latest = max(attendance_details[0]['timestamp'], attendance_details[1]['timestamp']) # t1, in this case
+				#print(latest)
+				if latest==attendance_details[0]['timestamp']:
+					del attendance_details[1]
+					#print("----if")
 				else:
-					validates = True
-				total_lunch = ""
-				if lunch_in_timestamp != "" and lunch_out_timestamp != "":
-					total_lunch = lunch_in_timestamp - lunch_out_timestamp 
-				elif lunch_in_timestamp == "" and lunch_out_timestamp != "":
-					validates = True
-
-				elif lunch_in_timestamp != "" and lunch_out_timestamp == "":
-					validates = True
-				total = check_out_timestamp - check_in_timestamp
-
-				total_working = ""
-				if total_lunch != "":
-					total_working = total - total_lunch
+					del attendance_details[0]
+					#print("----else")
+			#print(attendance_details)	   
+			if ((attendance_details[0]['punch']==attendance_details[1]['punch']==0) ):
+				latest = min(attendance_details[0]['timestamp'], attendance_details[1]['timestamp']) # t1, in this case
+				#print(latest)
+				if latest==attendance_details[0]['timestamp']:
+					del attendance_details[1]
+					#print("----if")
 				else:
-					total_working = total
-				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
-					one_hour_less = datetime.timedelta(seconds = 3600)
-					total_working -= one_hour_less
-				if lunch_in_timestamp != "" and lunch_out_timestamp == "":
-					one_hour_less = datetime.timedelta(seconds = 3600)
-					total_working -= one_hour_less
-
-				converted = datetime.timedelta(seconds = total_pots)
-				if total_working != "":
-					total_worked = total_working - converted
-			elif check_out_timestamp == "" and check_in_timestamp != "":
-				validates = True
-				total_worked = ""
-				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
-					total_worked = lunch_out_timestamp - check_in_timestamp
-					validates = True
-				elif lunch_in_timestamp != "" and lunch_out_timestamp != "":
-					lunch_break = lunch_in_timestamp - lunch_out_timestamp
-					total_worked = convert - check_in_timestamp
-					total_worked -= lunch_break	
-				if pto_out_timestamp == "" and pto_in_timestamp == "":
-					if total_pots != "":
-						converted = datetime.timedelta(seconds = total_pots)
-					if total_worked != "":
-						total_worked -= converted
-					elif total_worked == "":
-						total_worked = convert - check_in_timestamp
-						total_worked -= converted
-				elif pto_out_timestamp != "" and pto_in_timestamp == "":
-					validates = True
-					if total_pots != "":
-						converted = datetime.timedelta(seconds = total_pots)
-						if total_worked != "":
-							#total_worked -= converted
-							total_worked = pto_out_timestamp - check_in_timestamp
-							pto_time = convert - pto_out_timestamp
-							converted += pto_time
-							total_worked -= converted
-					elif total_pots == "":
-    						
-						pto_time = convert - pto_out_timestamp 
-						if total_worked != "":
-							total_worked -= pto_time
-						elif total_worked == "":
-							total_worked = pto_out_timestamp - check_in_timestamp
-							total_worked -= pto_time
-			complete = ""
-			if validates == True:
-				complete = 'No'
-			else:
-				complete = 'Yes'
-			if len(details)>1:
-				data.append([employee_name[0]['employee_name'],employee,details[0]['date'].strftime("%d-%m-%Y"),status_id,check_in_timestamp,
-					details[0]['source'],check_out_timestamp,details[1]['source'],complete,
-					employee_name[0]['department'],employee_name[0]['branch']])
-			else:
-				data.append([employee_name[0]['employee_name'],employee,details[0]['date'].strftime("%d-%m-%Y"),status_id,check_in_timestamp,
-					details[0]['source'],check_out_timestamp,"",complete,
-					employee_name[0]['department'],employee_name[0]['branch']])
-    				
-	else:
-		attendance = fetching_previous_day_attendance_details(filters)
-		prepare_attendace = get_prepare_attendance(attendance)
-		#print("prepare_attendence",prepare_attendace)
-		for ds in prepare_attendace:
-			i =0
-			total_pots = 0
-			validates = False
-			lunch_missed_in = False
-			lunch_missed_out = False
-			check_out_timestamp = ""
-			check_in_timestamp = ""
-			lunch_out_timestamp = ""
-			lunch_in_timestamp = ""
-			pto_out_timestamp= ""
-			pto_in_timestamp = ""
-			location = ""
-			converted = ""
-			total_worked = ""
-			attendance_details = prepare_attendace[ds]
-			#print("attendence_details",attendance_details)
-			#print("ds",ds)
-			status = get_status(ds,filters)
-			status_id = ""
-			if status[0].punch_status == "Check In" or status[0].punch_status == "Lunch In" or status[0].punch_status == "PTO In":
-				status_id = "At Work"
-			elif status[0].punch_status == "Lunch Out":
-				status_id = "At Lunch"
-			elif status[0].punch_status == "PTO Out":
-				status_id = "PTO"
-			elif status[0].punch_status == "Check Out":
-				status_id = "Signed out for the day"
-			for pre in attendance_details:
-				if pre['punch'] == check_in[0]['punch_no']:
-					check_in_timestamp = pre['timestamp']
-				elif pre['punch'] == check_out[0]['punch_no']:
-					check_out_timestamp =  pre['timestamp']
-				elif pre['punch'] == lunch_in[0]['punch_no']:
-					lunch_in_timestamp =  pre['timestamp']
-				elif pre['punch'] == lunch_out[0]['punch_no']:
-					lunch_out_timestamp =  pre['timestamp']
-				elif pre['punch'] == pto_out[0]['punch_no']:
-					pto_out_timestamp =  pre['timestamp']
-
-				elif pre['punch'] == pto_in[0]['punch_no']:
-					i +=1
-					pto_in_timestamp =  pre['timestamp']
-
-				if pto_out_timestamp != "" and pto_in_timestamp != "":
-
-					total_pot = pto_in_timestamp - pto_out_timestamp
-					seconds = total_pot.seconds
-
-					total_pots += seconds
-
-					pto_out_timestamp = ""
-					pto_in_timestamp = ""
-
-			employee_name = frappe.get_list("Employee", filters={"name": ds}, fields=["employee_name", "department","branch"])
-			total = ""
-			if check_out_timestamp == "":
-				datetime_end = str(to_date)+" 23:59:59"
-				convert_end = datetime.datetime.strptime(datetime_end, '%Y-%m-%d %H:%M:%S')
-				if current_datetime >= convert_end:
-					check_out_timestamp = convert_end
-					status_id = "Signed out for the day"
-			if check_out_timestamp != "" and check_in_timestamp != "":
-				if pto_out_timestamp == "" and pto_in_timestamp == "":
-					pass
+					del attendance_details[0]
+					#print("----else")
+			
+	
+		if (len(attendance_details)==3):
+			#print("entered in 3")
+			if ( (attendance_details[0]['punch']==attendance_details[1]['punch']==0) ):
+				latest = min(attendance_details[0]['timestamp'], attendance_details[0]['timestamp']) # t1, in this case
+				#print("both 0 and 1 are in",latest)
+				if latest==attendance_details[0]['timestamp']:
+					del attendance_details[1]
+					#print("----if")
 				else:
-					validates = True
-				total_lunch = ""
-				if lunch_in_timestamp != "" and lunch_out_timestamp != "":
-					total_lunch = lunch_in_timestamp - lunch_out_timestamp 
-				elif lunch_in_timestamp == "" and lunch_out_timestamp != "":
-					validates = True
-
-				elif lunch_in_timestamp != "" and lunch_out_timestamp == "":
-					validates = True
-				total = check_out_timestamp - check_in_timestamp
-				total_working = ""
-				if total_lunch != "":
-					total_working = total - total_lunch
+					del attendance_details[0]
+					#print("----else")
+		if (len(attendance_details)==3):	
+			if attendance_details[0]['punch']==attendance_details[2]['punch']==0:
+				latest = min(attendance_details[0]['timestamp'], attendance_details[2]['timestamp']) # t1, in this case
+				#print("both 0 and 2 are in",latest)
+				if latest==attendance_details[0]['timestamp']:
+					del attendance_details[2]
+					#print("----if")
 				else:
-					total_working = total
-				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
-					one_hour_less = datetime.timedelta(seconds = 3600)
-					total_working -= one_hour_less
-				if lunch_in_timestamp != "" and lunch_out_timestamp == "":
-					one_hour_less = datetime.timedelta(seconds = 3600)
-					total_working -= one_hour_less
-
-				converted = datetime.timedelta(seconds = total_pots)
-				if total_working != "":
-					total_worked = total_working - converted
-			elif check_out_timestamp == "" and check_in_timestamp != "":
-				validates = True
-				total_worked = ""
-				if lunch_in_timestamp == "" and lunch_out_timestamp != "":
-					total_worked = lunch_out_timestamp - check_in_timestamp
-
-					validates = True
-				elif lunch_in_timestamp != "" and lunch_out_timestamp != "":
-					lunch_break = lunch_in_timestamp - lunch_out_timestamp
-					total_worked = convert - check_in_timestamp
-					total_worked -= lunch_break
-				if pto_out_timestamp == "" and pto_in_timestamp == "":
-					if total_pots != "":
-						converted = datetime.timedelta(seconds = total_pots)
-						if total_worked != "":
-							total_worked -= converted
-						elif total_worked == "":
-							total_worked = convert - check_in_timestamp
-							total_worked -= converted
-				elif pto_out_timestamp != "" and pto_in_timestamp == "":
-					validates = True
-					if total_pots != 0:
-						converted = datetime.timedelta(seconds = total_pots)
-						if total_worked != "":
-							#total_worked -= converted
-							total_worked = pto_out_timestamp - check_in_timestamp
-							pto_time = convert - pto_out_timestamp
-							converted += pto_time
-							total_worked -= converted
-						elif total_worked == "": 
-							pto_time = convert - pto_out_timestamp
-							total_worked = pto_out_timestamp - check_in_timestamp
-							total_worked -= pto_time
-							converted += pto_time
-							
-					elif total_pots == 0:
-
-						pto_time = convert - pto_out_timestamp
-						converted = pto_time
-						if total_worked != "":
-							total_worked -= pto_time
-						elif total_worked == "":
-							total_worked = pto_out_timestamp - check_in_timestamp
-							total_worked -= pto_time
-							
-			complete = ""
-			if validates == True:
-				complete = 'No'
-			else:
-				complete = 'Yes'
-			if len(attendance_details)>1:
-				data.append([employee_name[0]['employee_name'],ds,attendance_details[0]['date'].strftime("%d-%m-%Y"),status_id,check_in_timestamp,
-						attendance_details[0]['source'],check_out_timestamp,attendance_details[1]['source'],complete,
-						employee_name[0]['department'],employee_name[0]['branch']])	
-			else:
-					
-				data.append([employee_name[0]['employee_name'],ds,attendance_details[0]['date'].strftime("%d-%m-%Y"),status_id,check_in_timestamp,
-					attendance_details[0]['source'],check_out_timestamp,"",complete,
-					employee_name[0]['department'],employee_name[0]['branch']])	
-
+					del attendance_details[0]
+					#print("----else")
+			   
+		if (len(attendance_details)==3):
+			#print("entered in 3 out")
+			if ( (attendance_details[1]['punch']==attendance_details[2]['punch']==1) ):
+				latest = max(attendance_details[1]['timestamp'], attendance_details[2]['timestamp']) # t1, in this case
+				#print("both 1 and 2 are out",latest)
+				if latest==attendance_details[1]['timestamp']:
+					del attendance_details[2]
+					#print("----if")
+				else:
+					del attendance_details[1]
+					#print("----else")
+		if (len(attendance_details)==3):
+			if ( (attendance_details[0]['punch']==attendance_details[2]['punch']==1) ):
+				latest = max(attendance_details[0]['timestamp'], attendance_details[2]['timestamp']) # t1, in this case
+				#print("both 0 and 2 are out",latest)
+				if latest==attendance_details[0]['timestamp']:
+					del attendance_details[2]
+					#print("----if")
+				else:
+					del attendance_details[0]
+					#print("----else")
 		
+		if (len(attendance_details)==4):
+			#print("enterd in length 4")
+			if ( (attendance_details[1]['punch']==attendance_details[3]['punch']==1) ):
+				latest = max(attendance_details[1]['timestamp'], attendance_details[3]['timestamp']) # t1, in this case
+				#print("entered in logout",latest)
+				if latest==attendance_details[1]['timestamp']:
+					del attendance_details[3]
+					#print("----if")
+				else:
+					del attendance_details[1]
+					#print("----else")
+			#print(attendance_details)
+		if (len(attendance_details)==4):	   
+			if ((attendance_details[0]['punch']==attendance_details[2]['punch']==0) ):
+				#print("entered in if login")
+				latest = min(attendance_details[0]['timestamp'], attendance_details[2]['timestamp']) # t1, in this case
+				#print("login",latest)
+				if latest==attendance_details[0]['timestamp']:
+					del attendance_details[2]
+					#print("----if")
+				else:
+					del attendance_details[0]
+					#print("----else")
+			#print("final",attendance_details)	   
+		
+		for pre in attendance_details:
+			if pre['punch'] == check_in[0]['punch_no'] or  pre['punch_status'] == "IN":
+				check_in_timestamp = pre['timestamp']
+				check_in_source=pre['source']
+				check_in_location_name=pre['location_name']
+			elif pre['punch'] == check_out[0]['punch_no'] or pre['punch_status'] == "OUT":
+				check_out_timestamp =  pre['timestamp']
+				check_out_source=pre['source']
+				check_out_location_name=pre['location_name']
+		employee_name = frappe.get_list("Employee", filters={"name":prepare_attendace[ds][0]['empployee_id']}, fields=["employee_name", "department","branch"])
+		#print("employee_name",employee_name)
+		if len(attendance_details)>1:
+			data.append([employee_name[0]['employee_name'],prepare_attendace[ds][0]['empployee_id'],
+		attendance_details[0]['timestamp'].strftime("%d-%m-%Y"),check_in_timestamp,
+		check_in_source,check_in_location_name,check_out_timestamp,check_out_source,check_out_location_name,
+		
+	employee_name[0]['department'],employee_name[0]['branch']])
+		else:
+			data.append([employee_name[0]['employee_name'],prepare_attendace[ds][0]['empployee_id'],
+		attendance_details[0]['timestamp'].strftime("%d-%m-%Y"),check_in_timestamp,
+		check_in_source,check_in_location_name,check_out_timestamp,"","",
+		
+	employee_name[0]['department'],employee_name[0]['branch']])
 
 	return columns, data
 
@@ -344,12 +187,12 @@ def get_columns():
 		_("Employee Name") + "::150",
 		_("Employee ID") + ":Link/Employee:150",
 		_("Date") + "::150",
-		_("Current Status") + "::150",
 		_("Check In") + "::150",
 		_("Check In Source") + "::150",
-		_("Check Out") + "::150",
-		_("Check Out Source") + "::150",
-		_("Complete In and out") + "::200",
+		_("Check In Location") + "::150",
+		_("Check out") + "::150",
+		_("Check out Source") + "::150",
+		_("Check out Location") + "::150",
 		_("Department") + "::150",
 		_("Branch") + "::150"
 		]
@@ -357,7 +200,15 @@ def get_columns():
 
 def fetching_previous_day_attendance_details(filters):
     condition = get_conditions(filters)
-    sql_str = frappe.db.sql("""select * from `tabBiometric Attendance` b , `tabEmployee` e where e.name = b.employee_id
+    sql_str = frappe.db.sql("""select e.employee_name,b.employee_id,b.timestamp as date,b.punch_status,b.punch,"m@tendance" as doc_source,b.timestamp as timestamp,b.location_name,e.department,e.branch from `tabBiometric Attendance` b , `tabEmployee` e where e.name = b.employee_id and  b.docstatus=1
+ %s  """ %
+		condition, as_dict=1)
+	#print("sql",sql_str)
+    return sql_str 
+
+def fetching_checkin_attendance_details(filters):
+    condition = get_employee_checkin_condition(filters)
+    sql_str = frappe.db.sql("""select eci.employee_name,eci.employee as employee_id,eci.time as date,eci.time as timestamp,"Employee Check In/Out" as doc_source,"" as location_name,eci.log_type as punch_status,if(eci.log_type="IN",0,1) as punch,e.department,e.branch  from `tabEmployee Checkin` eci , `tabEmployee` e where e.name = eci.employee
  %s  """ %
 		condition, as_dict=1)
 	#print("sql",sql_str)
@@ -368,71 +219,56 @@ def get_conditions(filters):
 	conditions=""
 	#print("enterd in condition")
 	if filters.get("from_date"):
-		conditions += 'and b.date >= %s'  % frappe.db.escape(filters.get("from_date"), percent=False)
+		conditions +='and DATE_FORMAT(b.timestamp, "%%Y-%%m-%%d") >= %s'   % frappe.db.escape(filters.get("from_date"), percent=False)
 	if filters.get("to_date"):
-		conditions += 'and b.date <= %s' % frappe.db.escape(filters.get("to_date"), percent=False)
+		conditions += 'and DATE_FORMAT(b.timestamp, "%%Y-%%m-%%d") <= %s' % frappe.db.escape(filters.get("to_date"), percent=False)
 	if filters.get("department"):
 		conditions += 'and e.department = %s' % frappe.db.escape(filters.get("department"), percent=False)
 	if filters.get("branch"):
 		conditions += 'and e.branch = %s' % frappe.db.escape(filters.get("branch"), percent=False)
 	if filters.get("reports_to"):
-		conditions += 'and b.employee_id = %s' % frappe.db.escape(filters.get("reports_to"), percent=False)
+		conditions += 'and e.reports_to= %s' % frappe.db.escape(filters.get("reports_to"), percent=False)
 	return conditions
 
-def get_prepare_attendance(attendance):
+def get_employee_checkin_condition(filters):
+	conditions=""
+	#print("enterd in condition")
+	if filters.get("from_date"):
+		conditions += 'and DATE_FORMAT(eci.time, "%%Y-%%m-%%d") >= %s'  % frappe.db.escape(filters.get("from_date"), percent=False)
+	if filters.get("to_date"):
+		conditions += 'and DATE_FORMAT(eci.time, "%%Y-%%m-%%d") <= %s' % frappe.db.escape(filters.get("to_date"), percent=False)
+	if filters.get("department"):
+		conditions += 'and e.department = %s' % frappe.db.escape(filters.get("department"), percent=False)
+	if filters.get("branch"):
+		conditions += 'and e.branch = %s' % frappe.db.escape(filters.get("branch"), percent=False)
+	if filters.get("reports_to"):
+		conditions += 'and e.reports_to= %s' % frappe.db.escape(filters.get("reports_to"), percent=False)
+	return conditions
+
+def get_prepare_attendance_1(result_set):
 	data = {}
-	for d in attendance:
+	for d in result_set:
 		if d.employee_id:
-			key = d.employee_id
+			key = d.employee_id+"-"+d.timestamp.strftime("%d-%m-%Y")
+			#print("key----------",key)
 			if len(data) != 0:
 				if key in data:
-					data[key].append({"user_name": d.user_name, "location":d.location_name, "punch_status": d.punch_status, "punch":d.punch, "timestamp":d.timestamp, "empployee_id":d.employee_id, "source":d.source, "date":d.date})
+					data[key].append({"user_name": d.user_name, "location_name":d.location_name, "punch_status": d.punch_status, "punch":d.punch, "timestamp":d.timestamp, "empployee_id":d.employee_id, "source":d.doc_source})
 				else:
-					data[key]=[{"user_name": d.user_name, "location":d.location_name, "punch_status": d.punch_status, "punch":d.punch, "timestamp":d.timestamp, "empployee_id":d.employee_id, "source":d.source, "date":d.date}]
+					data[key]=[{"user_name": d.user_name, "location_name":d.location_name, "punch_status": d.punch_status, "punch":d.punch, "timestamp":d.timestamp, "empployee_id":d.employee_id, "source":d.doc_source}]
 			else:
-				data[key]=[{"user_name": d.user_name, "location":d.location_name, "punch_status": d.punch_status, "punch":d.punch, "timestamp":d.timestamp, "empployee_id":d.employee_id, "source":d.source, "date":d.date}]
-			#print(data)
+				data[key]=[{"user_name": d.user_name, "location_name":d.location_name, "punch_status": d.punch_status, "punch":d.punch, "timestamp":d.timestamp, "empployee_id":d.employee_id, "source":d.doc_source}]
+		#print("--------",data)
 	return data
 
-def get_status(employee,filters):
-	#condition = get_conditions_of_status(filters)
-	from_date=filters.get("from_date")
-	to_date=filters.get("to_date")
-	if from_date is not None:
-		status = frappe.db.sql("""select * from `tabBiometric Attendance` where employee_id = %s  and date >=%s order by name desc limit 1 """,(employee,from_date), as_dict=1)
-	elif to_date is not None:
-		status = frappe.db.sql("""select * from `tabBiometric Attendance` where employee_id = %s  and date <=%s order by name desc limit 1 """,(employee,to_date), as_dict=1)
-	#print("status",status)
-	return status
-
-def get_attendance_details(employee,from_date,to_date,filters):
-	branch = filters.get("branch")
-	department = filters.get("department")
-	
-	if branch is not None and department is not None:
-		attendance = frappe.db.sql("""select * from `tabBiometric Attendance` b, `tabEmployee` e where e.name = b.employee_id and b.employee_id = %s  and b.date>= %s and b.date<= %s and b.docstatus=1 and e.branch = %s and e.department = %s order by  b.name""",(employee,from_date,to_date,branch,department),as_dict=1)
-	elif branch is not None:
-		attendance = frappe.db.sql("""select * from `tabBiometric Attendance` b, `tabEmployee` e where e.name = b.employee_id and b.employee_id = %s  and b.date>= %s and b.date<= %s and b.docstatus=1 and e.branch = %s order by  b.name""",(employee,from_date,to_date,branch),as_dict=1)
-	elif department is not None:
-		attendance = frappe.db.sql("""select * from `tabBiometric Attendance` b, `tabEmployee` e where e.name = b.employee_id and b.employee_id = %s  and b.date>= %s and b.date<= %s and b.docstatus=1 and e.department = %s order by  b.name""",(employee,from_date,to_date,department),as_dict=1)
-	else:
-		attendance = frappe.db.sql("""select * from `tabBiometric Attendance` b, `tabEmployee` e where e.name = b.employee_id and b.employee_id = %s  and b.date>= %s and b.date<= %s and b.docstatus=1  order by  b.name""",(employee,from_date,to_date),as_dict=1)
-	return attendance
 
 
 
-def get_prepare_details(details):
-	
-	pto_in = frappe.get_list("Punch Child",filters={"punch_type":"PTO In"}, fields=["punch_no"])
-	pto_out = frappe.get_list("Punch Child",filters={"punch_type":"PTO Out"}, fields=["punch_no"])
-	#print ("details-------------",details)
-	data = []
-	i =0
-	for d in details:
-		if d['punch'] == pto_out[0]['punch_no']:
-			data.append({"pto_out": d['timestamp']})
-		elif d['punch'] == pto_in[0]['punch_no']:
-			i +=1
-			data.append({"pto_in": d['timestamp'], "no_of_time": i})
-			#print ("i-------------",i)
-	return data
+
+
+
+
+
+
+    
+
