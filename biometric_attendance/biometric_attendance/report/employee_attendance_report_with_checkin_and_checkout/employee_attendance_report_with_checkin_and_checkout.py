@@ -58,6 +58,10 @@ def execute(filters=None):
 		location = ""
 		converted = ""
 		total_worked = ""
+		check_in_source=""
+		check_in_location_name=""
+		check_out_source=""
+		check_out_location_name=""
 		#print("--------",prepare_attendace[ds][0]['empployee_id'])
 		attendance_details = prepare_attendace[ds]
 		#print("attendence_details",attendance_details)
@@ -170,14 +174,12 @@ def execute(filters=None):
 			data.append([employee_name[0]['employee_name'],prepare_attendace[ds][0]['empployee_id'],
 		attendance_details[0]['timestamp'].strftime("%d-%m-%Y"),check_in_timestamp,
 		check_in_source,check_in_location_name,check_out_timestamp,check_out_source,check_out_location_name,
-		
-	employee_name[0]['department'],employee_name[0]['branch']])
+		employee_name[0]['department'],employee_name[0]['branch']])
 		else:
 			data.append([employee_name[0]['employee_name'],prepare_attendace[ds][0]['empployee_id'],
 		attendance_details[0]['timestamp'].strftime("%d-%m-%Y"),check_in_timestamp,
 		check_in_source,check_in_location_name,check_out_timestamp,"","",
-		
-	employee_name[0]['department'],employee_name[0]['branch']])
+		employee_name[0]['department'],employee_name[0]['branch']])
 
 	return columns, data
 
@@ -271,4 +273,3 @@ def get_prepare_attendance_1(result_set):
 
 
     
-
