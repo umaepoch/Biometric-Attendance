@@ -78,7 +78,9 @@ def execute(filters=None):
 				else:
 					del attendance_details[0]
 					#print("----else")
-			#print(attendance_details)	   
+			#print(attendance_details)
+			
+		if (len(attendance_details)==2):	   
 			if ((attendance_details[0]['punch']==attendance_details[1]['punch']==0) ):
 				latest = min(attendance_details[0]['timestamp'], attendance_details[1]['timestamp']) # t1, in this case
 				#print(latest)
