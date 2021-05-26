@@ -10,8 +10,7 @@
     "gps_percentage",
     "percentage_test_field",
     "matendance_session_timeout",
-    "capture_gps_location_for_all_user",
-    "dont_capture_gps_location_for_all_user"
+    "capture_gps_location_for_all_user"
    ],
    "fields": [
     {
@@ -60,16 +59,10 @@
      "fieldname": "capture_gps_location_for_all_user",
      "fieldtype": "Check",
      "label": "Capture GPS Location For All User"
-    },
-    {
-     "default": "0",
-     "fieldname": "dont_capture_gps_location_for_all_user",
-     "fieldtype": "Check",
-     "label": "Dont Capture GPS Location For All User"
     }
    ],
    "issingle": 1,
-   "modified": "2021-05-25 09:53:00.401321",
+   "modified": "2021-05-26 18:36:13.038211",
    "modified_by": "Administrator",
    "module": "Biometric Attendance",
    "name": "Biometric Settings",
