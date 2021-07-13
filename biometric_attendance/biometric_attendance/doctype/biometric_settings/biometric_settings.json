@@ -1,86 +1,86 @@
 {
-   "creation": "2020-06-01 10:01:04.177146",
-   "doctype": "DocType",
-   "engine": "InnoDB",
-   "field_order": [
-    "waiting_time_for_log_out",
-    "waiting_time_for_log_in",
-    "gps_accuracy_method",
-    "gps_precision",
-    "gps_percentage",
-    "percentage_test_field",
-    "matendance_session_timeout",
-    "capture_gps_location_for_all_user"
-   ],
-   "fields": [
-    {
-     "fieldname": "waiting_time_for_log_out",
-     "fieldtype": "Int",
-     "label": "Waiting Time For Log Out(In Minutes)"
-    },
-    {
-     "fieldname": "waiting_time_for_log_in",
-     "fieldtype": "Int",
-     "label": "Waiting Time for Log In (In Minutes)"
-    },
-    {
-     "fieldname": "gps_accuracy_method",
-     "fieldtype": "Select",
-     "label": "GPS Accuracy Method",
-     "options": "Decimal\nPercentage\nMeter"
-    },
-    {
-     "default": "3",
-     "fieldname": "gps_precision",
-     "fieldtype": "Select",
-     "label": "GPS Precision",
-     "options": "\n1\n2\n3\n4\n5"
-    },
-    {
-     "fieldname": "gps_percentage",
-     "fieldtype": "Select",
-     "label": "GPS Percentage",
-     "options": "1\n2\n3\n4\n5\n6\n7\n8\n9"
-    },
-    {
-     "fieldname": "percentage_test_field",
-     "fieldtype": "Select",
-     "label": "Percentage Test Field",
-     "options": "10\n100\n1000\n10000\n100000"
-    },
-    {
-     "default": "2",
-     "fieldname": "matendance_session_timeout",
-     "fieldtype": "Int",
-     "label": "matendance Session TimeOut(In Minutes)"
-    },
-    {
-     "default": "0",
-     "fieldname": "capture_gps_location_for_all_user",
-     "fieldtype": "Check",
-     "label": "Capture GPS Location For All User"
-    }
-   ],
-   "issingle": 1,
-   "modified": "2021-05-26 18:36:13.038211",
-   "modified_by": "Administrator",
-   "module": "Biometric Attendance",
-   "name": "Biometric Settings",
-   "owner": "Administrator",
-   "permissions": [
-    {
-     "create": 1,
-     "delete": 1,
-     "email": 1,
-     "print": 1,
-     "read": 1,
-     "role": "System Manager",
-     "share": 1,
-     "write": 1
-    }
-   ],
-   "quick_entry": 1,
-   "sort_field": "modified",
-   "sort_order": "ASC",
-   "track_changes": 1
+ "creation": "2020-06-01 10:01:04.177146",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "waiting_time_for_log_out",
+  "waiting_time_for_log_in",
+  "gps_accuracy_method",
+  "gps_precision",
+  "gps_percentage",
+  "percentage_test_field",
+  "matendance_session_timeout",
+  "capture_gps_location_for_all_user"
+ ],
+ "fields": [
+  {
+   "fieldname": "waiting_time_for_log_out",
+   "fieldtype": "Int",
+   "label": "Waiting Time For Log Out(In Minutes)"
+  },
+  {
+   "fieldname": "waiting_time_for_log_in",
+   "fieldtype": "Int",
+   "label": "Waiting Time for Log In (In Minutes)"
+  },
+  {
+   "fieldname": "gps_accuracy_method",
+   "fieldtype": "Select",
+   "label": "GPS Accuracy Method",
+   "options": "Decimal\nPercentage\nMeter"
+  },
+  {
+   "default": "3",
+   "fieldname": "gps_precision",
+   "fieldtype": "Select",
+   "label": "GPS Precision",
+   "options": "\n1\n2\n3\n4\n5"
+  },
+  {
+   "fieldname": "gps_percentage",
+   "fieldtype": "Select",
+   "label": "GPS Percentage",
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9"
+  },
+  {
+   "fieldname": "percentage_test_field",
+   "fieldtype": "Select",
+   "label": "Percentage Test Field",
+   "options": "10\n100\n1000\n10000\n100000"
+  },
+  {
+   "default": "2",
+   "fieldname": "matendance_session_timeout",
+   "fieldtype": "Int",
+   "label": "matendance Session TimeOut(In Minutes)"
+  },
+  {
+   "default": "0",
+   "fieldname": "capture_gps_location_for_all_user",
+   "fieldtype": "Check",
+   "label": "Capture GPS Location For All User"
   }
+ ],
+ "issingle": 1,
+ "modified": "2021-05-26 18:36:13.038211",
+ "modified_by": "Administrator",
+ "module": "Biometric Attendance",
+ "name": "Biometric Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}
